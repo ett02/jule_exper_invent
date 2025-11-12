@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,8 +18,9 @@ export class ServiceBookingComponent implements OnInit {
   selectedBarber: any;
   availability: any[] = [];
   selectedAvailability: any;
+  appointmentDate: Date = new Date();
 
-  constructor(private apiService: ApiService, private router: Router) {
+  constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
     const navigation = this.router.getCurrentNavigation();
     this.service = navigation?.extras.state?.['service'];
   }
@@ -50,11 +52,12 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   bookAppointment(): void {
+    const customerId = this.authService.getDecodedToken()?.id;
     const appointment = {
-      customer: { id: 1 }, // TODO: Get the actual customer ID
+      customer: { id: customerId },
       barber: { id: this.selectedBarber.id },
       service: { id: this.service.id },
-      data: new Date(), // TODO: Get the actual date
+      data: this.appointmentDate,
       orario_inizio: this.selectedAvailability.orario_inizio,
       stato: 'PENDING'
     };
