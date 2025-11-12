@@ -36,7 +36,7 @@ public class Appointments {
 
     private LocalDate data;
 
-    private LocalTime orario_inizio;
+    private LocalTime orarioInizio;
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus stato;

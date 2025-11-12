@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Service } from '../../models/service.model';
 
 @Component({
   selector: 'app-customer-dashboard',
@@ -11,22 +12,22 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./customer-dashboard.component.css']
 })
 export class CustomerDashboardComponent implements OnInit {
-  services: any[] = [];
+  services: Service[] = [];
 
   constructor(private apiService: ApiService, private router: Router) { }
 
   ngOnInit(): void {
     this.apiService.getAllServices().subscribe(
-      (data: any) => {
+      (data: Service[]) => {
         this.services = data;
       },
-      (error: any) => {
+      (error) => {
         console.error('Error fetching services', error);
       }
     );
   }
 
-  bookService(service: any) {
+  bookService(service: Service) {
     this.router.navigate(['/book'], { state: { service } });
   }
 }

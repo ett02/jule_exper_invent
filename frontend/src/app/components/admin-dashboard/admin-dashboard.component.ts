@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Service } from '../../models/service.model';
+import { Barber } from '../../models/barber.model';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -11,17 +13,17 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent implements OnInit {
-  services: any[] = [];
-  barbers: any[] = [];
+  services: Service[] = [];
+  barbers: Barber[] = [];
 
-  newService = {
+  newService: Partial<Service> = {
     nome: '',
     durata: 0,
     prezzo: 0,
     descrizione: ''
   };
 
-  newBarber = {
+  newBarber: Partial<Barber> = {
     nome: '',
     cognome: '',
     esperienza: '',
@@ -36,11 +38,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadServices(): void {
-    this.apiService.getAllServices().subscribe((data: any) => this.services = data);
+    this.apiService.getAllServices().subscribe((data: Service[]) => this.services = data);
   }
 
   loadBarbers(): void {
-    this.apiService.getAllBarbers().subscribe((data: any) => this.barbers = data);
+    this.apiService.getAllBarbers().subscribe((data: Barber[]) => this.barbers = data);
   }
 
   createService(): void {
@@ -50,8 +52,10 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  deleteService(id: number): void {
-    this.apiService.deleteService(id).subscribe(() => this.loadServices());
+  deleteService(id: number | undefined): void {
+    if (id) {
+      this.apiService.deleteService(id).subscribe(() => this.loadServices());
+    }
   }
 
   createBarber(): void {
@@ -61,7 +65,9 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  deleteBarber(id: number): void {
-    this.apiService.deleteBarber(id).subscribe(() => this.loadBarbers());
+  deleteBarber(id: number | undefined): void {
+    if (id) {
+      this.apiService.deleteBarber(id).subscribe(() => this.loadBarbers());
+    }
   }
 }

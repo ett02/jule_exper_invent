@@ -4,6 +4,10 @@ import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Service } from '../../models/service.model';
+import { Barber } from '../../models/barber.model';
+import { Availability } from '../../models/availability.model';
+import { Appointment } from '../../models/appointment.model';
 
 @Component({
   selector: 'app-service-booking',
@@ -13,11 +17,11 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./service-booking.component.css']
 })
 export class ServiceBookingComponent implements OnInit {
-  service: any;
-  barbers: any[] = [];
-  selectedBarber: any;
-  availability: any[] = [];
-  selectedAvailability: any;
+  service!: Service;
+  barbers: Barber[] = [];
+  selectedBarber!: Barber;
+  availability: Availability[] = [];
+  selectedAvailability!: Availability;
   appointmentDate: Date = new Date();
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
@@ -28,10 +32,10 @@ export class ServiceBookingComponent implements OnInit {
   ngOnInit(): void {
     if (this.service) {
       this.apiService.getBarbersForService(this.service.id).subscribe(
-        (data: any) => {
+        (data: Barber[]) => {
           this.barbers = data;
         },
-        (error: any) => {
+        (error) => {
           console.error('Error fetching barbers', error);
         }
       );
@@ -41,10 +45,10 @@ export class ServiceBookingComponent implements OnInit {
   onBarberChange(): void {
     if (this.selectedBarber) {
       this.apiService.getBarberAvailability(this.selectedBarber.id).subscribe(
-        (data: any) => {
+        (data: Availability[]) => {
           this.availability = data;
         },
-        (error: any) => {
+        (error) => {
           console.error('Error fetching availability', error);
         }
       );
@@ -53,12 +57,12 @@ export class ServiceBookingComponent implements OnInit {
 
   bookAppointment(): void {
     const customerId = this.authService.getDecodedToken()?.id;
-    const appointment = {
-      customer: { id: customerId },
-      barber: { id: this.selectedBarber.id },
-      service: { id: this.service.id },
+    const appointment: Partial<Appointment> = {
+      customer: { id: customerId, nome: '', cognome: '', email: '', ruolo: 'CLIENTE' },
+      barber: { id: this.selectedBarber.id, nome: '', cognome: '', esperienza: '', specialita: '', is_active: true, user_id: 0 },
+      service: { id: this.service.id, nome: '', durata: 0, prezzo: 0, descrizione: '' },
       data: this.appointmentDate,
-      orario_inizio: this.selectedAvailability.orario_inizio,
+      orarioInizio: this.selectedAvailability.orario_inizio,
       stato: 'PENDING'
     };
 
@@ -66,7 +70,7 @@ export class ServiceBookingComponent implements OnInit {
       () => {
         this.router.navigate(['/appointments']);
       },
-      (error: any) => {
+      (error) => {
         console.error('Error booking appointment', error);
       }
     );
