@@ -1,32 +1,43 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.BarberServices;
+import com.example.demo.model.Barbers;
+import com.example.demo.service.BarbersService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/barbers")
 public class BarbersController {
 
+    @Autowired
+    private BarbersService barbersService;
+
     @PostMapping
-    public void createBarber() {
-        // TODO: Implement create barber logic
+    public Barbers createBarber(@RequestBody Barbers barber) {
+        return barbersService.createBarber(barber);
     }
 
     @GetMapping
-    public void getAllBarbers() {
-        // TODO: Implement get all barbers logic
+    public List<Barbers> getAllBarbers() {
+        return barbersService.getAllBarbers();
     }
 
     @GetMapping("/{id}")
-    public void getBarberById(@PathVariable Long id) {
-        // TODO: Implement get barber by id logic
+    public Barbers getBarberById(@PathVariable Long id) {
+        return barbersService.getBarberById(id);
     }
 
     @PostMapping("/{id}/services")
-    public void assignServiceToBarber(@PathVariable Long id) {
-        // TODO: Implement assign service to barber logic
+    public BarberServices assignServiceToBarber(@PathVariable Long id, @RequestParam Long serviceId) {
+        return barbersService.assignServiceToBarber(id, serviceId);
     }
 }
