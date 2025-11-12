@@ -36,11 +36,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadServices(): void {
-    this.apiService.getAllServices().subscribe(data => this.services = data);
+    this.apiService.getAllServices().subscribe((data: any) => this.services = data);
   }
 
   loadBarbers(): void {
-    this.apiService.getAllBarbers().subscribe(data => this.barbers = data);
+    this.apiService.getAllBarbers().subscribe((data: any) => this.barbers = data);
   }
 
   createService(): void {

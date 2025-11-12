@@ -24,7 +24,7 @@ export class AppointmentListComponent implements OnInit {
         (data: any) => {
           this.appointments = data;
         },
-        error => {
+        (error: any) => {
           console.error('Error fetching appointments', error);
         }
       );
