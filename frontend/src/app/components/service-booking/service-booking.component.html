@@ -1,0 +1,22 @@
+<div>
+  <h2>Book {{ service?.nome }}</h2>
+  <form (ngSubmit)="bookAppointment()">
+    <div>
+      <label for="date">Select a Date</label>
+      <input type="date" id="date" [(ngModel)]="appointmentDate" name="date" required>
+    </div>
+    <div>
+      <label for="barber">Select a Barber</label>
+      <select id="barber" [(ngModel)]="selectedBarber" name="barber" (change)="onBarberChange()">
+        <option *ngFor="let barber of barbers" [ngValue]="barber">{{ barber.nome }} {{ barber.cognome }}</option>
+      </select>
+    </div>
+    <div *ngIf="selectedBarber">
+      <label for="availability">Select a Time</label>
+      <select id="availability" [(ngModel)]="selectedAvailability" name="availability">
+        <option *ngFor="let slot of availability" [ngValue]="slot">{{ slot.giorno }} at {{ slot.orario_inizio }}</option>
+      </select>
+    </div>
+    <button type="submit" [disabled]="!selectedBarber || !selectedAvailability">Confirm Booking</button>
+  </form>
+</div>

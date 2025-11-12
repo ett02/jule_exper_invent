@@ -52,9 +52,4 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
-
-    @PostMapping("/google-login")
-    public void googleLogin() {
-        // TODO: Implement google login logic
-    }
 }
