@@ -1,32 +1,41 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.Appointments;
+import com.example.demo.service.AppointmentsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/appointments")
 public class AppointmentsController {
 
+    @Autowired
+    private AppointmentsService appointmentsService;
+
     @PostMapping
-    public void createAppointment() {
-        // TODO: Implement create appointment logic
+    public Appointments createAppointment(@RequestBody Appointments appointment) {
+        return appointmentsService.createAppointment(appointment);
     }
 
     @GetMapping("/user/{user_id}")
-    public void getAppointmentsByUserId(@PathVariable Long user_id) {
-        // TODO: Implement get appointments by user id logic
+    public List<Appointments> getAppointmentsByUserId(@PathVariable Long user_id) {
+        return appointmentsService.getAppointmentsByUserId(user_id);
     }
 
     @GetMapping("/barber/{barber_id}")
-    public void getAppointmentsByBarberId(@PathVariable Long barber_id) {
-        // TODO: Implement get appointments by barber id logic
+    public List<Appointments> getAppointmentsByBarberId(@PathVariable Long barber_id) {
+        return appointmentsService.getAppointmentsByBarberId(barber_id);
     }
 
     @GetMapping("/{appointment_id}")
-    public void getAppointmentById(@PathVariable Long appointment_id) {
-        // TODO: Implement get appointment by id logic
+    public Appointments getAppointmentById(@PathVariable Long appointment_id) {
+        return appointmentsService.getAppointmentById(appointment_id);
     }
 }
