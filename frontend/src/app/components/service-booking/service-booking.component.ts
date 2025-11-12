@@ -17,12 +17,11 @@ import { Appointment } from '../../models/appointment.model';
   styleUrls: ['./service-booking.component.css']
 })
 export class ServiceBookingComponent implements OnInit {
-  service!: Service;
-  barbers: Barber[] = [];
-  selectedBarber!: Barber;
-  availability: Availability[] = [];
-  selectedAvailability!: Availability;
-  appointmentDate: Date = new Date();
+  service: any;
+  barbers: any[] = [];
+  selectedBarber: any;
+  availability: any[] = [];
+  selectedAvailability: any;
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
     const navigation = this.router.getCurrentNavigation();
@@ -56,13 +55,12 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   bookAppointment(): void {
-    const customerId = this.authService.getDecodedToken()?.id;
-    const appointment: Partial<Appointment> = {
-      customer: { id: customerId, nome: '', cognome: '', email: '', ruolo: 'CLIENTE' },
-      barber: { id: this.selectedBarber.id, nome: '', cognome: '', esperienza: '', specialita: '', is_active: true, user_id: 0 },
-      service: { id: this.service.id, nome: '', durata: 0, prezzo: 0, descrizione: '' },
-      data: this.appointmentDate,
-      orarioInizio: this.selectedAvailability.orario_inizio,
+    const appointment = {
+      customer: { id: 1 }, // TODO: Get the actual customer ID
+      barber: { id: this.selectedBarber.id },
+      service: { id: this.service.id },
+      data: new Date(), // TODO: Get the actual date
+      orario_inizio: this.selectedAvailability.orario_inizio,
       stato: 'PENDING'
     };
 
