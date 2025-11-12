@@ -20,7 +20,7 @@ export class CustomerDashboardComponent implements OnInit {
       (data: any) => {
         this.services = data;
       },
-      error => {
+      (error: any) => {
         console.error('Error fetching services', error);
       }
     );

@@ -29,7 +29,7 @@ export class ServiceBookingComponent implements OnInit {
         (data: any) => {
           this.barbers = data;
         },
-        error => {
+        (error: any) => {
           console.error('Error fetching barbers', error);
         }
       );
@@ -42,7 +42,7 @@ export class ServiceBookingComponent implements OnInit {
         (data: any) => {
           this.availability = data;
         },
-        error => {
+        (error: any) => {
           console.error('Error fetching availability', error);
         }
       );
@@ -63,7 +63,7 @@ export class ServiceBookingComponent implements OnInit {
       () => {
         this.router.navigate(['/appointments']);
       },
-      error => {
+      (error: any) => {
         console.error('Error booking appointment', error);
       }
     );

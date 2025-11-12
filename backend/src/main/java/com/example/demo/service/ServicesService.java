@@ -24,4 +24,8 @@ public class ServicesService {
     public Services getServiceById(Long id) {
         return servicesRepository.findById(id).orElse(null);
     }
+
+    public void deleteService(Long id) {
+        servicesRepository.deleteById(id);
+    }
 }

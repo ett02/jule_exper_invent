@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BarbersService {
@@ -46,5 +47,15 @@ public class BarbersService {
             return barberServicesRepository.save(barberService);
         }
         return null;
+    }
+
+    public void deleteBarber(Long id) {
+        barbersRepository.deleteById(id);
+    }
+
+    public List<Barbers> getBarbersByService(Long serviceId) {
+        return barberServicesRepository.findByServizioId(serviceId).stream()
+                .map(BarberServices::getBarbiere)
+                .collect(Collectors.toList());
     }
 }
