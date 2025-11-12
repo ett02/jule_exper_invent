@@ -28,8 +28,6 @@ public class AvailabilityService {
     }
 
     public List<Availability> getAvailability(Long barberId) {
-        return availabilityRepository.findAll().stream()
-                .filter(availability -> availability.getBarbiere().getId().equals(barberId))
-                .toList();
+        return availabilityRepository.findByBarbiereId(barberId);
     }
 }

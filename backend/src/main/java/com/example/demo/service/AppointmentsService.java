@@ -18,15 +18,11 @@ public class AppointmentsService {
     }
 
     public List<Appointments> getAppointmentsByUserId(Long userId) {
-        return appointmentsRepository.findAll().stream()
-                .filter(appointment -> appointment.getCustomer().getId().equals(userId))
-                .toList();
+        return appointmentsRepository.findByCustomerId(userId);
     }
 
     public List<Appointments> getAppointmentsByBarberId(Long barberId) {
-        return appointmentsRepository.findAll().stream()
-                .filter(appointment -> appointment.getBarber().getId().equals(barberId))
-                .toList();
+        return appointmentsRepository.findByBarberId(barberId);
     }
 
     public Appointments getAppointmentById(Long appointmentId) {
