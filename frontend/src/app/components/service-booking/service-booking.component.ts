@@ -60,18 +60,14 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   bookAppointment(): void {
-    const customerId = this.authService.getUserId();
-    if (!customerId) {
-      console.error('Customer ID not found');
-      return;
-    }
-    const appointment = {
-      customer: { id: customerId },
-      barber: { id: this.selectedBarber.id },
-      service: { id: this.service.id },
-      data: new Date(this.appointmentDate),
-      orario_inizio: this.selectedAvailability.orario_inizio,
-      stato: 'PENDING' as const
+    const customer = this.authService.getDecodedToken();
+    const appointment: Partial<Appointment> = {
+      customer: { id: customer.id } as any, // Cast to any to avoid type checking issues
+      barber: { id: this.selectedBarber.id } as any,
+      service: { id: this.service.id } as any,
+      data: this.appointmentDate,
+      orarioInizio: this.appointmentTime,
+      stato: 'PENDING'
     };
 
     this.apiService.createAppointment(appointment).subscribe(
