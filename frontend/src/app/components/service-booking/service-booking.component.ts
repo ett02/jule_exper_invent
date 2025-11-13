@@ -13,8 +13,7 @@ import { Appointment } from '../../models/appointment.model';
   selector: 'app-service-booking',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './service-booking.component.html',
-  styleUrls: ['./service-booking.component.css']
+  templateUrl: './service-booking.component.html'
 })
 export class ServiceBookingComponent implements OnInit {
   service: any;
@@ -57,14 +56,18 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   bookAppointment(): void {
-    const customer = this.authService.getDecodedToken();
-    const appointment: Partial<Appointment> = {
-      customer: { id: customer.id } as any, // Cast to any to avoid type checking issues
-      barber: { id: this.selectedBarber.id } as any,
-      service: { id: this.service.id } as any,
+    const customerId = this.authService.getUserId();
+    if (!customerId) {
+      console.error('Customer ID not found');
+      return;
+    }
+    const appointment = {
+      customer: { id: customerId },
+      barber: { id: this.selectedBarber.id },
+      service: { id: this.service.id },
       data: new Date(this.appointmentDate),
-      orarioInizio: this.appointmentTime,
-      stato: 'PENDING'
+      orario_inizio: this.selectedAvailability.orario_inizio,
+      stato: 'PENDING' as const
     };
 
     this.apiService.createAppointment(appointment).subscribe(
