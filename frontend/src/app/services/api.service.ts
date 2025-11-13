@@ -46,8 +46,8 @@ export class ApiService {
     return this.http.get<Barber[]>(`${this.apiUrl}/services/${serviceId}/barbers`);
   }
 
-  getBarberAvailability(barberId: number): Observable<Availability[]> {
-    return this.http.get<Availability[]>(`${this.apiUrl}/barbers/${barberId}/availability`);
+  getBarberAvailability(barberId: number, date: string): Observable<Availability[]> {
+    return this.http.get<Availability[]>(`${this.apiUrl}/barbers/${barberId}/availability`, { params: { date } });
   }
 
   createAppointment(appointment: Partial<Appointment>): Observable<Appointment> {

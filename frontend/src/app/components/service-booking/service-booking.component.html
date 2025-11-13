@@ -3,7 +3,7 @@
   <form (ngSubmit)="bookAppointment()">
     <div>
       <label for="date">Select a Date</label>
-      <input type="date" id="date" [(ngModel)]="appointmentDate" name="date" required>
+      <input type="date" id="date" [(ngModel)]="appointmentDate" name="date" (change)="onDateChange()" required>
     </div>
     <div>
       <label for="barber">Select a Barber</label>
