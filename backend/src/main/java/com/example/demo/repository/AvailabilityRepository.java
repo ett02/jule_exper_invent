@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
-    List<Availability> findByBarbiereId(Long barbiereId);
+    List<Availability> findByBarberId(Long barberId);
+    List<Availability> findByBarberIdAndGiorno(Long barberId, Integer giorno);
 }
