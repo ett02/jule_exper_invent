@@ -1,10 +1,18 @@
-<div>
-  <h2>Welcome, Customer!</h2>
-  <h3>Our Services</h3>
-  <ul>
-    <li *ngFor="let service of services">
-      {{ service.nome }} - {{ service.prezzo }}€
-      <button (click)="bookService(service)">Book Now</button>
-    </li>
-  </ul>
+<div class="dashboard-container">
+  <h1>Dashboard Cliente</h1>
+
+  <div class="section">
+    <h2>Servizi Disponibili</h2>
+    <ul class="item-list">
+      <li *ngFor="let service of services">
+        <span>{{ service.nome }} - {{ service.prezzo | number:'1.2-2' }} €</span>
+        <button (click)="bookService(service)">Prenota</button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>I Miei Appuntamenti</h2>
+    <a routerLink="/appointments">Visualizza i tuoi appuntamenti</a>
+  </div>
 </div>

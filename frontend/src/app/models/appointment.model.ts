@@ -4,9 +4,9 @@ import { Service } from './service.model';
 
 export interface Appointment {
     id: number;
-    customer: any;
-    barber: any;
-    service: any;
+    customer: User;
+    barber: Barber;
+    service: Service;
     data: Date;
     orarioInizio: string;
     stato: 'CONFIRMATO' | 'PENDING' | 'ANNULLATO';
