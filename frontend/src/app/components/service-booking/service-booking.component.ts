@@ -22,7 +22,8 @@ export class ServiceBookingComponent implements OnInit {
   selectedBarber: any;
   availability: any[] = [];
   selectedAvailability: any;
-  appointmentDate: string = '';
+  appointmentDate: any; // Add this line
+  appointmentTime: any; // Add this line
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
     const navigation = this.router.getCurrentNavigation();
@@ -43,8 +44,8 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   onBarberChange(): void {
-    if (this.selectedBarber && this.appointmentDate) {
-      this.apiService.getBarberAvailability(this.selectedBarber.id, this.appointmentDate).subscribe(
+    if (this.selectedBarber) {
+      this.apiService.getBarberAvailability(this.selectedBarber.id).subscribe(
         (data: Availability[]) => {
           this.availability = data;
         },
@@ -53,10 +54,6 @@ export class ServiceBookingComponent implements OnInit {
         }
       );
     }
-  }
-
-  onDateChange(): void {
-    this.onBarberChange();
   }
 
   bookAppointment(): void {
