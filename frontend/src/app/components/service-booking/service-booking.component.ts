@@ -22,6 +22,8 @@ export class ServiceBookingComponent implements OnInit {
   selectedBarber: any;
   availability: any[] = [];
   selectedAvailability: any;
+  appointmentDate: any; // Add this line
+  appointmentTime: any; // Add this line
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
     const navigation = this.router.getCurrentNavigation();
@@ -55,12 +57,13 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   bookAppointment(): void {
-    const appointment = {
-      customer: { id: 1 }, // TODO: Get the actual customer ID
-      barber: { id: this.selectedBarber.id },
-      service: { id: this.service.id },
-      data: new Date(), // TODO: Get the actual date
-      orario_inizio: this.selectedAvailability.orario_inizio,
+    const customer = this.authService.getDecodedToken();
+    const appointment: Partial<Appointment> = {
+      customer: { id: customer.id } as any, // Cast to any to avoid type checking issues
+      barber: { id: this.selectedBarber.id } as any,
+      service: { id: this.service.id } as any,
+      data: this.appointmentDate,
+      orarioInizio: this.appointmentTime,
       stato: 'PENDING'
     };
 
