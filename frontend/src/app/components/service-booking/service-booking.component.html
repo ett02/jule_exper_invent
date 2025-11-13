@@ -13,8 +13,8 @@
     </div>
     <div *ngIf="selectedBarber">
       <label for="availability">Select a Time</label>
-      <select id="availability" [(ngModel)]="appointmentTime" name="availability">
-        <option *ngFor="let slot of availability" [ngValue]="slot.orarioInizio">{{ slot.giorno }} at {{ slot.orarioInizio }}</option>
+      <select id="availability" [(ngModel)]="selectedAvailability" name="availability">
+        <option *ngFor="let slot of availability" [ngValue]="slot">{{ slot.giorno }} at {{ slot.orario_inizio }}</option>
       </select>
     </div>
     <button type="submit" [disabled]="!selectedBarber || !selectedAvailability">Confirm Booking</button>
