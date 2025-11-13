@@ -7,6 +7,7 @@ import com.example.demo.repository.BarbersRepository;
 import com.example.demo.repository.BarberServicesRepository;
 import com.example.demo.repository.ServicesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class BarbersService {
     @Autowired
     private BarberServicesRepository barberServicesRepository;
 
-    public Barbers createBarber(Barbers barber) {
+    public Barbers createBarber(@NonNull Barbers barber) {
         return barbersRepository.save(barber);
     }
 
@@ -32,11 +33,11 @@ public class BarbersService {
         return barbersRepository.findAll();
     }
 
-    public Barbers getBarberById(Long id) {
+    public Barbers getBarberById(@NonNull Long id) {
         return barbersRepository.findById(id).orElse(null);
     }
 
-    public BarberServices assignServiceToBarber(Long barberId, Long serviceId) {
+    public BarberServices assignServiceToBarber(@NonNull Long barberId, @NonNull Long serviceId) {
         Barbers barber = barbersRepository.findById(barberId).orElse(null);
         Services service = servicesRepository.findById(serviceId).orElse(null);
 
@@ -49,7 +50,7 @@ public class BarbersService {
         return null;
     }
 
-    public void deleteBarber(Long id) {
+    public void deleteBarber(@NonNull Long id) {
         barbersRepository.deleteById(id);
     }
 

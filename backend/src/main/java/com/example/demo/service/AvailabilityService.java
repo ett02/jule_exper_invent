@@ -5,6 +5,7 @@ import com.example.demo.model.Barbers;
 import com.example.demo.repository.AvailabilityRepository;
 import com.example.demo.repository.BarbersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class AvailabilityService {
     @Autowired
     private BarbersRepository barbersRepository;
 
-    public Availability setAvailability(Long barberId, Availability availability) {
+    public Availability setAvailability(@NonNull Long barberId, Availability availability) {
         Barbers barber = barbersRepository.findById(barberId).orElse(null);
         if (barber != null) {
             availability.setBarbiere(barber);
