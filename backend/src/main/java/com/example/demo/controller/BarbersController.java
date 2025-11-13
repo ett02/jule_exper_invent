@@ -4,6 +4,7 @@ import com.example.demo.model.BarberServices;
 import com.example.demo.model.Barbers;
 import com.example.demo.service.BarbersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,7 @@ public class BarbersController {
     private BarbersService barbersService;
 
     @PostMapping
-    public Barbers createBarber(@RequestBody Barbers barber) {
+    public Barbers createBarber(@RequestBody @NonNull Barbers barber) {
         return barbersService.createBarber(barber);
     }
 
@@ -33,17 +34,17 @@ public class BarbersController {
     }
 
     @GetMapping("/{id}")
-    public Barbers getBarberById(@PathVariable Long id) {
+    public Barbers getBarberById(@PathVariable @NonNull Long id) {
         return barbersService.getBarberById(id);
     }
 
     @PostMapping("/{id}/services")
-    public BarberServices assignServiceToBarber(@PathVariable Long id, @RequestParam Long serviceId) {
+    public BarberServices assignServiceToBarber(@PathVariable @NonNull Long id, @RequestParam @NonNull Long serviceId) {
         return barbersService.assignServiceToBarber(id, serviceId);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBarber(@PathVariable Long id) {
+    public void deleteBarber(@PathVariable @NonNull Long id) {
         barbersService.deleteBarber(id);
     }
 }

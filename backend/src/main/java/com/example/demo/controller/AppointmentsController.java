@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.model.Appointments;
 import com.example.demo.service.AppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +21,7 @@ public class AppointmentsController {
     private AppointmentsService appointmentsService;
 
     @PostMapping
-    public Appointments createAppointment(@RequestBody Appointments appointment) {
+    public Appointments createAppointment(@RequestBody @NonNull Appointments appointment) {
         return appointmentsService.createAppointment(appointment);
     }
 
@@ -35,7 +36,7 @@ public class AppointmentsController {
     }
 
     @GetMapping("/{appointment_id}")
-    public Appointments getAppointmentById(@PathVariable Long appointment_id) {
+    public Appointments getAppointmentById(@PathVariable @NonNull Long appointment_id) {
         return appointmentsService.getAppointmentById(appointment_id);
     }
 }
