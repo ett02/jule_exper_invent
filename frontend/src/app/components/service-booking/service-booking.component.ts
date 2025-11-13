@@ -23,6 +23,7 @@ export class ServiceBookingComponent implements OnInit {
   availability: any[] = [];
   selectedAvailability: any;
   appointmentDate: string = '';
+  appointmentTime: string = '';
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
     const navigation = this.router.getCurrentNavigation();
@@ -65,7 +66,7 @@ export class ServiceBookingComponent implements OnInit {
       customer: { id: customer.id } as any, // Cast to any to avoid type checking issues
       barber: { id: this.selectedBarber.id } as any,
       service: { id: this.service.id } as any,
-      data: this.appointmentDate,
+      data: new Date(this.appointmentDate),
       orarioInizio: this.appointmentTime,
       stato: 'PENDING'
     };
