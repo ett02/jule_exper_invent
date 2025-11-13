@@ -22,6 +22,7 @@ export class ServiceBookingComponent implements OnInit {
   selectedBarber: any;
   availability: any[] = [];
   selectedAvailability: any;
+  appointmentDate: string = '';
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
     const navigation = this.router.getCurrentNavigation();
@@ -42,8 +43,8 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   onBarberChange(): void {
-    if (this.selectedBarber) {
-      this.apiService.getBarberAvailability(this.selectedBarber.id).subscribe(
+    if (this.selectedBarber && this.appointmentDate) {
+      this.apiService.getBarberAvailability(this.selectedBarber.id, this.appointmentDate).subscribe(
         (data: Availability[]) => {
           this.availability = data;
         },
@@ -54,14 +55,23 @@ export class ServiceBookingComponent implements OnInit {
     }
   }
 
+  onDateChange(): void {
+    this.onBarberChange();
+  }
+
   bookAppointment(): void {
+    const customerId = this.authService.getUserId();
+    if (!customerId) {
+      console.error('Customer ID not found');
+      return;
+    }
     const appointment = {
-      customer: { id: 1 }, // TODO: Get the actual customer ID
+      customer: { id: customerId },
       barber: { id: this.selectedBarber.id },
       service: { id: this.service.id },
-      data: new Date(), // TODO: Get the actual date
+      data: new Date(this.appointmentDate),
       orario_inizio: this.selectedAvailability.orario_inizio,
-      stato: 'PENDING'
+      stato: 'PENDING' as const
     };
 
     this.apiService.createAppointment(appointment).subscribe(
