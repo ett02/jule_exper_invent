@@ -1,16 +1,16 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.AppointmentRequest;
+import com.example.demo.dto.AvailableSlotResponse;
 import com.example.demo.model.Appointments;
 import com.example.demo.service.AppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -21,22 +21,52 @@ public class AppointmentsController {
     private AppointmentsService appointmentsService;
 
     @PostMapping
-    public Appointments createAppointment(@RequestBody @NonNull Appointments appointment) {
-        return appointmentsService.createAppointment(appointment);
+    public ResponseEntity<Appointments> createAppointment(@RequestBody AppointmentRequest request) {
+        return ResponseEntity.ok(appointmentsService.createAppointment(request));
     }
 
-    @GetMapping("/user/{user_id}")
-    public List<Appointments> getAppointmentsByUserId(@PathVariable Long user_id) {
-        return appointmentsService.getAppointmentsByUserId(user_id);
+    @GetMapping("/user/{userId}")
+    public List<Appointments> getAppointmentsByUser(@PathVariable Long userId) {
+        return appointmentsService.getAppointmentsByUser(userId);
     }
 
-    @GetMapping("/barber/{barber_id}")
-    public List<Appointments> getAppointmentsByBarberId(@PathVariable Long barber_id) {
-        return appointmentsService.getAppointmentsByBarberId(barber_id);
+    @GetMapping("/barber/{barberId}")
+    public List<Appointments> getAppointmentsByBarber(@PathVariable Long barberId) {
+        return appointmentsService.getAppointmentsByBarber(barberId);
     }
 
-    @GetMapping("/{appointment_id}")
-    public Appointments getAppointmentById(@PathVariable @NonNull Long appointment_id) {
-        return appointmentsService.getAppointmentById(appointment_id);
+    @GetMapping("/{id}")
+    public ResponseEntity<Appointments> getAppointmentById(@PathVariable Long id) {
+        return appointmentsService.getAppointmentById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<Appointments> updateAppointment(
+            @PathVariable Long id,
+            @RequestBody AppointmentRequest request) {
+        return ResponseEntity.ok(appointmentsService.updateAppointment(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelAppointment(@PathVariable Long id) {
+        appointmentsService.cancelAppointment(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/available-slots")
+    public List<AvailableSlotResponse> getAvailableSlots(
+            @RequestParam Long barberId,
+            @RequestParam Long serviceId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return appointmentsService.getAvailableSlots(barberId, serviceId, date);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<Appointments> getAllAppointments() {
+        return appointmentsService.getAllAppointments();
     }
 }
