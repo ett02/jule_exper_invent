@@ -65,12 +65,12 @@ export class ServiceBookingComponent implements OnInit {
       return;
     }
     const appointment: Partial<Appointment> = {
-      customer: customer,
-      barber: this.selectedBarber,
-      service: this.service,
-      data: new Date(this.appointmentDate),
-      orarioInizio: this.selectedAvailability.orario_inizio,
-      stato: 'PENDING' as const
+      customer: { id: customer.id } as any, // Cast to any to avoid type checking issues
+      barber: { id: this.selectedBarber.id } as any,
+      service: { id: this.service.id } as any,
+      data: this.appointmentDate,
+      orarioInizio: this.appointmentTime,
+      stato: 'PENDING'
     };
 
     this.apiService.createAppointment(appointment).subscribe(
