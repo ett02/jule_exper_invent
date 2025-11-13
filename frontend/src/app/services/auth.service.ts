@@ -16,6 +16,13 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/login`, credentials);
   }
 
+ 
+
+  public getUser(): any { // 'any' è per semplicità, meglio se hai un modello User
+    const user = localStorage.getItem('user'); // <-- Assicurati che 'user' sia la chiave che usi al login!
+  return user ? JSON.parse(user) : null;
+}
+
   register(user: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, user);
   }

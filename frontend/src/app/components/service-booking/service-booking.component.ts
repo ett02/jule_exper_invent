@@ -29,6 +29,9 @@ export class ServiceBookingComponent implements OnInit {
     this.service = navigation?.extras.state?.['service'];
   }
 
+
+
+
   ngOnInit(): void {
     if (this.service) {
       this.apiService.getBarbersForService(this.service.id).subscribe(
@@ -56,17 +59,17 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   bookAppointment(): void {
-    const customerId = this.authService.getUserId();
-    if (!customerId) {
-      console.error('Customer ID not found');
+    const customer = this.authService.getUser();
+    if (!customer) {
+      console.error('Customer not found');
       return;
     }
-    const appointment = {
-      customer: { id: customerId },
-      barber: { id: this.selectedBarber.id },
-      service: { id: this.service.id },
+    const appointment: Partial<Appointment> = {
+      customer: customer,
+      barber: this.selectedBarber,
+      service: this.service,
       data: new Date(this.appointmentDate),
-      orario_inizio: this.selectedAvailability.orario_inizio,
+      orarioInizio: this.selectedAvailability.orario_inizio,
       stato: 'PENDING' as const
     };
 
