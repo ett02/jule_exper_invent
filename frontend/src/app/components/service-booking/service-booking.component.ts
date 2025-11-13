@@ -62,7 +62,7 @@ export class ServiceBookingComponent implements OnInit {
       customer: { id: customer.id } as any, // Cast to any to avoid type checking issues
       barber: { id: this.selectedBarber.id } as any,
       service: { id: this.service.id } as any,
-      data: new Date(this.appointmentDate),
+      data: this.appointmentDate,
       orarioInizio: this.appointmentTime,
       stato: 'PENDING'
     };
