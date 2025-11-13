@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.lang.NonNull;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -14,7 +15,7 @@ public class AppointmentsService {
     @Autowired
     private AppointmentsRepository appointmentsRepository;
 
-    public Appointments createAppointment(@NonNull Appointments appointment) {
+    public Appointments createAppointment(Appointments appointment) {
         return appointmentsRepository.save(appointment);
     }
 

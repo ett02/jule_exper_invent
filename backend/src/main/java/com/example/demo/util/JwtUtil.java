@@ -1,5 +1,6 @@
 package com.example.demo.util;
 
+import com.example.demo.model.Users;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -36,16 +37,20 @@ public class JwtUtil {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
+   private Claims extractAllClaims(String token) {
+    return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
     }
 
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
+public String generateToken(UserDetails userDetails, Users user) {
         Map<String, Object> claims = new HashMap<>();
+
+        claims.put("id", user.getId());
+        claims.put("role", user.getRuolo().toString());
+        
         return createToken(claims, userDetails.getUsername());
     }
 

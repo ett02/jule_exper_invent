@@ -13,7 +13,8 @@ import { Appointment } from '../../models/appointment.model';
   selector: 'app-service-booking',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './service-booking.component.html'
+  templateUrl: './service-booking.component.html',
+  //styleUrls: ['./service-booking.component.css']
 })
 export class ServiceBookingComponent implements OnInit {
   service: any;
@@ -21,8 +22,9 @@ export class ServiceBookingComponent implements OnInit {
   selectedBarber: any;
   availability: any[] = [];
   selectedAvailability: any;
-  appointmentDate: any; // Add this line
-  appointmentTime: any; // Add this line
+
+  appointmentDate: any; 
+  appointmentTime: any;
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
     const navigation = this.router.getCurrentNavigation();
@@ -58,18 +60,27 @@ export class ServiceBookingComponent implements OnInit {
     }
   }
 
-  bookAppointment(): void {
-    const customer = this.authService.getUser();
-    if (!customer) {
-      console.error('Customer not found');
+ bookAppointment(): void {
+    // 1. Ottieni l'ID utente dal token, non da getUser()
+    const decodedToken = this.authService.getDecodedToken();
+    if (!decodedToken?.id) {
+      console.error('Customer not found in token');
       return;
     }
+    const customerId = decodedToken.id;
+
+    // 2. Costruisci l'oggetto appuntamento
     const appointment: Partial<Appointment> = {
-      customer: { id: customer.id } as any, // Cast to any to avoid type checking issues
+      // Il backend si aspetta solo gli ID per creare le relazioni
+      customer: { id: customerId } as any, 
       barber: { id: this.selectedBarber.id } as any,
       service: { id: this.service.id } as any,
+      
       data: this.appointmentDate,
-      orarioInizio: this.appointmentTime,
+      
+      // 3. Usa il nome corretto della proprietà (camelCase)
+      orarioInizio: this.appointmentTime, 
+      
       stato: 'PENDING'
     };
 
