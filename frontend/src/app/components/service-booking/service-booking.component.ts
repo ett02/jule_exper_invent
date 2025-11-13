@@ -13,8 +13,7 @@ import { Appointment } from '../../models/appointment.model';
   selector: 'app-service-booking',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './service-booking.component.html',
-  styleUrls: ['./service-booking.component.css']
+  templateUrl: './service-booking.component.html'
 })
 export class ServiceBookingComponent implements OnInit {
   service: any;
@@ -29,6 +28,9 @@ export class ServiceBookingComponent implements OnInit {
     const navigation = this.router.getCurrentNavigation();
     this.service = navigation?.extras.state?.['service'];
   }
+
+
+
 
   ngOnInit(): void {
     if (this.service) {
@@ -57,7 +59,11 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   bookAppointment(): void {
-    const customer = this.authService.getDecodedToken();
+    const customer = this.authService.getUser();
+    if (!customer) {
+      console.error('Customer not found');
+      return;
+    }
     const appointment: Partial<Appointment> = {
       customer: { id: customer.id } as any, // Cast to any to avoid type checking issues
       barber: { id: this.selectedBarber.id } as any,
