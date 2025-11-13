@@ -48,8 +48,10 @@ public class AuthController {
         }
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
-        final String jwt = jwtUtil.generateToken(userDetails);
-
+       
+        final Users user = userDetailsService.getFullUserByEmail(authenticationRequest.getEmail());
+        final String jwt = jwtUtil.generateToken(userDetails, user); 
+        
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 }

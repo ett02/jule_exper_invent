@@ -14,7 +14,7 @@ import { Appointment } from '../../models/appointment.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './service-booking.component.html',
-  styleUrls: ['./service-booking.component.css']
+  //styleUrls: ['./service-booking.component.css']
 })
 export class ServiceBookingComponent implements OnInit {
   service: any;
@@ -22,6 +22,9 @@ export class ServiceBookingComponent implements OnInit {
   selectedBarber: any;
   availability: any[] = [];
   selectedAvailability: any;
+
+  appointmentDate: any; 
+  appointmentTime: any;
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router) {
     const navigation = this.router.getCurrentNavigation();
@@ -54,13 +57,27 @@ export class ServiceBookingComponent implements OnInit {
     }
   }
 
-  bookAppointment(): void {
-    const appointment = {
-      customer: { id: 1 }, // TODO: Get the actual customer ID
-      barber: { id: this.selectedBarber.id },
-      service: { id: this.service.id },
-      data: new Date(), // TODO: Get the actual date
-      orario_inizio: this.selectedAvailability.orario_inizio,
+ bookAppointment(): void {
+    // 1. Ottieni l'ID utente dal token, non da getUser()
+    const decodedToken = this.authService.getDecodedToken();
+    if (!decodedToken?.id) {
+      console.error('Customer not found in token');
+      return;
+    }
+    const customerId = decodedToken.id;
+
+    // 2. Costruisci l'oggetto appuntamento
+    const appointment: Partial<Appointment> = {
+      // Il backend si aspetta solo gli ID per creare le relazioni
+      customer: { id: customerId } as any, 
+      barber: { id: this.selectedBarber.id } as any,
+      service: { id: this.service.id } as any,
+      
+      data: this.appointmentDate,
+      
+      // 3. Usa il nome corretto della proprietà (camelCase)
+      orarioInizio: this.appointmentTime, 
+      
       stato: 'PENDING'
     };
 

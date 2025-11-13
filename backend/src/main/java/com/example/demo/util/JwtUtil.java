@@ -1,5 +1,6 @@
 package com.example.demo.util;
 
+import com.example.demo.model.Users;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -45,8 +46,12 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
+public String generateToken(UserDetails userDetails, Users user) {
         Map<String, Object> claims = new HashMap<>();
+
+        claims.put("id", user.getId());
+        claims.put("role", user.getRuolo().toString());
+        
         return createToken(claims, userDetails.getUsername());
     }
 
