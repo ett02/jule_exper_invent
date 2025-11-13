@@ -2,11 +2,13 @@ package com.example.demo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class AuthenticationResponse {
 
-    private final String jwt;
+    private String jwt;
 
 }
