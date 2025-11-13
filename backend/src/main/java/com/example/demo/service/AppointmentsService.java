@@ -5,6 +5,7 @@ import com.example.demo.dto.AvailableSlotResponse;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,10 @@ public class AppointmentsService {
 
     @Autowired
     private AvailabilityRepository availabilityRepository;
+
+    @Autowired
+    @Lazy
+    private WaitingListService waitingListService;
 
     private static final int SLOT_INTERVAL_MINUTES = 5;
 
@@ -100,8 +105,17 @@ public class AppointmentsService {
     public void cancelAppointment(Long id) {
         Appointments appointment = appointmentsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appuntamento non trovato"));
+        
+        Appointments cancelledAppointment = new Appointments();
+        cancelledAppointment.setBarber(appointment.getBarber());
+        cancelledAppointment.setService(appointment.getService());
+        cancelledAppointment.setData(appointment.getData());
+        cancelledAppointment.setOrarioInizio(appointment.getOrarioInizio());
+        
         appointment.setStato(Appointments.StatoAppuntamento.ANNULLATO);
         appointmentsRepository.save(appointment);
+
+        waitingListService.processWaitingListForCancelledAppointment(cancelledAppointment);
     }
 
     public List<AvailableSlotResponse> getAvailableSlots(Long barberId, Long serviceId, LocalDate date) {
