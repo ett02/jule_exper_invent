@@ -14,17 +14,18 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "availability")
 public class Availability {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "barbiere_id")
-    private Barbers barbiere;
+    @JoinColumn(name = "barbiere_id", nullable = false)
+    private Barbers barber;
 
-    private int giorno;
+    private Integer giorno; // 0=Domenica, 1=Lunedì, ..., 6=Sabato
 
-    private LocalTime orario_inizio;
+    private LocalTime orarioInizio;
 
-    private LocalTime orario_fine;
+    private LocalTime orarioFine;
 }

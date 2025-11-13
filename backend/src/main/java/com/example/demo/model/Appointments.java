@@ -1,14 +1,6 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,15 +15,15 @@ public class Appointments {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_id", nullable = false)
     private Users customer;
 
     @ManyToOne
-    @JoinColumn(name = "barber_id")
+    @JoinColumn(name = "barber_id", nullable = false)
     private Barbers barber;
 
     @ManyToOne
-    @JoinColumn(name = "service_id")
+    @JoinColumn(name = "service_id", nullable = false)
     private Services service;
 
     private LocalDate data;
@@ -39,9 +31,9 @@ public class Appointments {
     private LocalTime orarioInizio;
 
     @Enumerated(EnumType.STRING)
-    private AppointmentStatus stato;
+    private StatoAppuntamento stato;
 
-    public enum AppointmentStatus {
+    public enum StatoAppuntamento {
         CONFIRMATO,
         PENDING,
         ANNULLATO

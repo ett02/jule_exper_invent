@@ -25,9 +25,9 @@ public class Barbers {
 
     private String specialità;
 
-    private boolean is_active;
+    private Boolean isActive;
 
     @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", unique = true)
     private Users user;
 }
