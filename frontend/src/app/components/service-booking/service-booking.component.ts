@@ -31,6 +31,9 @@ export class ServiceBookingComponent implements OnInit {
     this.service = navigation?.extras.state?.['service'];
   }
 
+
+
+
   ngOnInit(): void {
     if (this.service) {
       this.apiService.getBarbersForService(this.service.id).subscribe(

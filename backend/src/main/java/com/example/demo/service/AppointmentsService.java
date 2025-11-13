@@ -4,6 +4,7 @@ import com.example.demo.model.Appointments;
 import com.example.demo.repository.AppointmentsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.NonNull;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -26,7 +27,7 @@ public class AppointmentsService {
         return appointmentsRepository.findByBarberId(barberId);
     }
 
-    public Appointments getAppointmentById(Long appointmentId) {
+    public Appointments getAppointmentById(@NonNull Long appointmentId) {
         return appointmentsRepository.findById(appointmentId).orElse(null);
     }
 }

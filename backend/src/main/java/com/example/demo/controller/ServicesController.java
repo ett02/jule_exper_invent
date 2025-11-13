@@ -5,6 +5,7 @@ import com.example.demo.model.Services;
 import com.example.demo.service.BarbersService;
 import com.example.demo.service.ServicesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +27,7 @@ public class ServicesController {
     private BarbersService barbersService;
 
     @PostMapping
-    public Services createService(@RequestBody Services service) {
+    public Services createService(@RequestBody @NonNull Services service) {
         return servicesService.createService(service);
     }
 
@@ -36,12 +37,12 @@ public class ServicesController {
     }
 
     @GetMapping("/{id}")
-    public Services getServiceById(@PathVariable Long id) {
+    public Services getServiceById(@PathVariable @NonNull Long id) {
         return servicesService.getServiceById(id);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteService(@PathVariable Long id) {
+    public void deleteService(@PathVariable @NonNull Long id) {
         servicesService.deleteService(id);
     }
 
