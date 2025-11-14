@@ -1,5 +1,4 @@
 <div class="booking-container">
-  <!-- Header con bottone Indietro -->
   <div class="booking-header">
     <button class="btn-back-home" (click)="goBackToDashboard()">
       ← Indietro
@@ -8,7 +7,6 @@
     <p class="subtitle">{{ selectedService?.nome || 'Seleziona servizio' }}</p>
   </div>
 
-  <!-- Progress Wizard -->
   <div class="progress-wizard">
     <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
       <div class="step-number">1</div>
@@ -31,7 +29,6 @@
     </div>
   </div>
 
-  <!-- Step 1: Selezione Servizio -->
   <div class="booking-step" *ngIf="currentStep === 1 && !selectedService">
     <h2>Scegli il Servizio</h2>
     <div class="services-grid">
@@ -47,7 +44,6 @@
     </div>
   </div>
 
-  <!-- Step 2: Selezione Barbiere -->
   <div class="booking-step" *ngIf="currentStep === 2">
     <h2>Scegli il Barbiere</h2>
     <div class="barbers-grid">
@@ -65,7 +61,6 @@
     </div>
   </div>
 
-  <!-- Step 3: Selezione Data -->
   <div class="booking-step" *ngIf="currentStep === 3">
     <h2>Scegli la Data</h2>
     <p class="date-hint">Seleziona una data in cui la barberia è aperta</p>
@@ -74,14 +69,12 @@
       <div class="calendar-wrapper">
         <label for="date-input" class="calendar-label">📅 Seleziona una data</label>
         
-        <!-- Selezione Mese/Anno -->
         <div class="month-selector">
           <button class="btn-month-nav" (click)="previousMonth()">←</button>
           <span class="current-month">{{ currentMonthDisplay }}</span>
           <button class="btn-month-nav" (click)="nextMonth()">→</button>
         </div>
         
-        <!-- Griglia Calendario -->
         <div class="calendar-grid">
           <div class="calendar-weekday" *ngFor="let day of weekDays">{{ day }}</div>
           <div 
@@ -98,7 +91,6 @@
           </div>
         </div>
         
-        <!-- Legenda -->
         <div class="calendar-legend">
           <div class="legend-item">
             <span class="legend-color available"></span>
@@ -117,7 +109,6 @@
     </div>
   </div>
 
-  <!-- Step 4: Selezione Orario -->
   <div class="booking-step" *ngIf="currentStep === 4">
     <h2>Scegli l'Orario</h2>
     <p class="orario-subtitle">Seleziona uno slot disponibile</p>
@@ -137,7 +128,6 @@
       </div>
     </div>
     
-    <!-- Messaggio se nessuno slot -->
     <div *ngIf="availableSlots.length === 0" class="no-slots-message">
       <p>😔 Nessuno slot disponibile per questa data</p>
       <button class="btn btn-secondary" (click)="previousStep()">
@@ -146,7 +136,6 @@
     </div>
   </div>
 
-  <!-- Riepilogo e Conferma -->
   <div class="booking-summary" *ngIf="selectedService && selectedBarber && selectedDate && selectedTime">
     <div class="summary-card">
       <h3>📋 Riepilogo Prenotazione</h3>
@@ -165,7 +154,7 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">Orario:</span>
-          <span class="summary-value">{{ selectedTime }}</span>
+          <span class="summary-value">{{ selectedTime?.time }}</span>
         </div>
         <div class="summary-row">
           <span class="summary-label">Durata:</span>
@@ -182,7 +171,6 @@
     </div>
   </div>
 
-  <!-- Navigation Buttons -->
   <div class="navigation-buttons">
     <button class="btn btn-outline" (click)="goBackToDashboard()">
       ← Torna alla Dashboard

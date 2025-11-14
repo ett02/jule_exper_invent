@@ -462,40 +462,47 @@
   border: 2px solid transparent;
 }
 
+
+/* --- (Correzione 3: Stile Slot Orario) --- */
+
 /* Slot DISPONIBILE */
-.slot-available {
-  background-color: #d4edda;
-  border-color: #28a745;
+/* Corretto da .slot-available a .time-slot.available */
+.time-slot.available {
+  background: var(--color-white);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
 }
 
-.slot-available:hover {
-  background-color: #c3e6cb;
+.time-slot.available:hover {
+  background: var(--color-primary);
+  color: var(--color-white);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+  box-shadow: 0 4px 8px rgba(255, 140, 0, 0.2);
 }
 
 /* Slot OCCUPATO */
-.slot-occupied {
-  background-color: #f8d7da;
-  border-color: #dc3545;
+/* Corretto da .slot-occupied a .time-slot.unavailable */
+.time-slot.unavailable {
+  background-color: #F0F0F0;
+  border-color: #E0E0E0;
+  color: #CCCCCC;
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.slot-occupied:hover {
+.time-slot.unavailable:hover {
   transform: none;
   box-shadow: none;
 }
 
 /* Slot SELEZIONATO */
-.slot-selected {
+/* Corretto da .slot-selected a .time-slot.selected */
+.time-slot.selected {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
   color: white;
-}
-
-.slot-selected .status-badge {
-  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4);
 }
 
 .slot-time {
@@ -505,23 +512,8 @@
 }
 
 .slot-status {
-  font-size: 0.875rem;
-}
-
-.status-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-.status-badge.available {
-  background-color: #28a745;
-  color: white;
-}
-
-.status-badge.occupied {
-  background-color: #dc3545;
-  color: white;
+  font-size: 1.25rem;
+  vertical-align: middle;
 }
 
 .no-slots-message {

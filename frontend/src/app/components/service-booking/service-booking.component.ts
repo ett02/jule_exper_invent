@@ -23,14 +23,12 @@ interface Service {
   descrizione: string;
 }
 
-// --- (Correzione 1: Interfaccia CalendarDay) ---
-// Aggiornata per corrispondere alle proprietà usate nell'HTML
 interface CalendarDay {
-  number: number | null; // Per {{ day.number }}
-  isEmpty: boolean;      // Per [class.empty] e *ngIf="!day.isEmpty"
+  number: number | null;
+  isEmpty: boolean;
   isToday: boolean;
-  selected: boolean;     // Per [class.selected]
-  available: boolean;    // Per [class.available]
+  selected: boolean;
+  available: boolean;
 }
 
 interface TimeSlot {
@@ -58,12 +56,8 @@ export class ServiceBookingComponent implements OnInit {
 
   currentMonth: Date = new Date();
   
-  // Proprietà per il calendario
   currentMonthDisplay: string = '';
   weekDays: string[] = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
-  
-  // --- (Correzione 1) ---
-  // Tipo aggiornato a CalendarDay[]
   calendarDays: CalendarDay[] = [];
 
   constructor(
@@ -75,9 +69,8 @@ export class ServiceBookingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.buildCalendar(); // Chiamata alla funzione aggiornata
+    this.buildCalendar(); 
 
-    // Logica di caricamento servizi (invariata)
     this.apiService.getAllServices().subscribe(
       (data) => {
         this.services = data;
@@ -104,11 +97,14 @@ export class ServiceBookingComponent implements OnInit {
     this.loadBarbers();
   }
 
+  // --- (Correzione 1: Numero Barbieri) ---
+  // Aggiunto il terzo barbiere per coerenza
   loadBarbers(): void {
     if (!this.selectedService) return;
     this.barbers = [
       { id: 1, nome: 'Marco', cognome: 'Bianchi', esperienza: '10 anni', specialita: 'Taglio classico' },
-      { id: 2, nome: 'Luca', cognome: 'Verdi', esperienza: '5 anni', specialita: 'Barba' }
+      { id: 2, nome: 'Luca', cognome: 'Verdi', esperienza: '5 anni', specialita: 'Barba' },
+      { id: 3, nome: 'Giuseppe', cognome: 'Neri', esperienza: '8 anni', specialita: 'Sfumature' }
     ];
   }
 
@@ -117,8 +113,6 @@ export class ServiceBookingComponent implements OnInit {
     this.nextStep();
   }
 
-  // --- (Correzione 2: Funzione buildCalendar) ---
-  // Aggiornata per popolare la nuova interfaccia CalendarDay
   buildCalendar(): void {
     const y = this.currentMonth.getFullYear();
     const m = this.currentMonth.getMonth();
@@ -133,33 +127,30 @@ export class ServiceBookingComponent implements OnInit {
     const daysInMonth = new Date(y, m + 1, 0).getDate();
     
     const today = new Date();
-    // Imposta l'ora a 0 per confrontare solo le date
     today.setHours(0, 0, 0, 0); 
 
-    // 1. Celle vuote
     for (let i = 0; i < firstDayOfMonth; i++) {
       this.calendarDays.push({
         number: null,
         isEmpty: true,
         isToday: false,
         selected: false,
-        available: false // Le celle vuote non sono disponibili
+        available: false
       });
     }
 
-    // 2. Giorni del mese
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(y, m, i);
       const dateString = `${y}-${String(m + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       const isToday = date.getTime() === today.getTime();
-      const isPast = date < today; // Controlla se il giorno è nel passato
+      const isPast = date < today;
 
       this.calendarDays.push({
         number: i,
         isEmpty: false,
         isToday: isToday,
-        selected: dateString === this.selectedDate, // Seleziona se corrisponde
-        available: !isPast // Un giorno non è disponibile se è nel passato
+        selected: dateString === this.selectedDate,
+        available: !isPast
       });
     }
   }
@@ -174,10 +165,7 @@ export class ServiceBookingComponent implements OnInit {
     this.buildCalendar();
   }
 
-  // --- (Correzione 3: Funzione selectDate) ---
-  // Aggiornata per usare la nuova interfaccia e gestire lo stato 'selected'
   selectDate(dayObj: CalendarDay): void {
-    // Non fare nulla se si clicca su un giorno vuoto o non disponibile
     if (dayObj.isEmpty || !dayObj.available) {
       console.warn('Giorno non disponibile:', dayObj);
       return;
@@ -189,9 +177,7 @@ export class ServiceBookingComponent implements OnInit {
     const mm = String(m).padStart(2, '0');
     this.selectedDate = `${y}-${mm}-${dd}`;
     
-    // Aggiorna lo stato 'selected' per tutti i giorni nel calendario
     this.calendarDays.forEach(day => {
-      // Seleziona solo il giorno cliccato
       day.selected = (day.number === dayObj.number && !day.isEmpty);
     });
 
