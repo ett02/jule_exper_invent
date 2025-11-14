@@ -108,4 +108,11 @@ export class CustomerDashboardComponent implements OnInit {
       this.loadWaitingList();
     }
   }
+
+  logout(): void {
+    if (confirm('Sei sicuro di voler uscire?')) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    }
+  }
 }

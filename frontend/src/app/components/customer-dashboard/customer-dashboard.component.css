@@ -11,6 +11,7 @@
   color: var(--color-white);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   margin-bottom: var(--spacing-xl);
+  position: relative;
 }
 
 .welcome-title {
@@ -40,6 +41,29 @@
   background: var(--color-background);
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.btn-logout {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  background: var(--color-white);
+  color: var(--color-primary);
+  border: 2px solid var(--color-white);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.btn-logout:hover {
+  background: transparent;
+  color: var(--color-white);
+  border-color: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
 }
 
 /* Appointments Section */
@@ -307,5 +331,12 @@
 
   .appointments-grid {
     grid-template-columns: 1fr;
+  }
+
+  .btn-logout {
+    position: static;
+    display: block;
+    margin: 0 auto var(--spacing-md);
+    width: fit-content;
   }
 }

@@ -16,7 +16,10 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/login`, credentials);
   }
 
- 
+  logout(): void {
+    localStorage.removeItem('token');
+    console.log('Logout effettuato, token rimosso');
+  }
 
   public getUser(): any { // 'any' è per semplicità, meglio se hai un modello User
     const user = localStorage.getItem('user'); // <-- Assicurati che 'user' sia la chiave che usi al login!

@@ -1059,3 +1059,89 @@ Ruolo: CLIENTE
 - Implementare selezione barbiere e giorno con design moderno
 - Implementare AppointmentListComponent
 - Completare stilizzazione RegisterComponent
+
+---
+
+👤 CREDENZIALI UTENTI TEST:
+
+### **Admin (NUOVO - Creato tramite API)**:
+- **Email:** `admin@barbershop.com`
+- **Password:** `admin123`
+- **Ruolo:** `ADMIN`
+- **Metodo Creazione:** API `/auth/register` con BCrypt automatico
+
+### **Cliente:**
+- **Email:** `prova@gmail.com`
+- **Password:** `prova`
+- **Ruolo:** `CLIENTE`
+
+---
+
+**📝 PROBLEMA RISOLTO (14 NOV 2025 - 03:50 AM):**
+
+**Problema**: Utente admin `admin@barbershop.com` restituiva **403 Forbidden** al login.
+
+**Causa Identificata**: 
+- Password inserita manualmente nel database tramite SQL **NON era hashata correttamente** con BCrypt
+- I nuovi utenti registrati tramite `/auth/register` funzionavano perché `AuthService.register()` hasha automaticamente la password con `passwordEncoder.encode()`
+
+**Tentativi di Soluzione**:
+1. ❌ Inserimento hash BCrypt manualmente nel database → Non funzionante
+2. ❌ Generazione hash tramite script Java → Hash non corrispondente
+3. ✅ **SOLUZIONE FINALE**: Eliminato admin esistente + Creato tramite API `/auth/register`
+
+**Procedura Risolutiva**:
+1. ✅ Eliminato utente admin esistente: `DELETE FROM users WHERE email = 'admin@barbershop.com'`
+2. ✅ Creato nuovo admin tramite **Postman**:
+   ```
+   POST http://localhost:8080/auth/register
+   Body: {"nome": "Admin", "cognome": "Sistema", "email": "admin@barbershop.com", "password": "admin123", "ruolo": "ADMIN"}
+   ```
+3. ✅ Password hashata automaticamente da Spring Security BCrypt
+4. ✅ **Login admin funzionante** con `admin@barbershop.com` / `admin123`
+5. ✅ **Redirect corretto** a `/admin-dashboard`
+
+**Verifica Finale nel Database**:
+```sql
+SELECT id, nome, email, LEFT(password, 30) AS password_hash, ruolo
+FROM users
+WHERE email = 'admin@barbershop.com';
+
+-- Output:
+-- id: 10
+-- nome: Admin
+-- email: admin@barbershop.com
+-- password_hash: $2a$10$eHQZf.k/hOEqMEhWZK5.Ou... (BCrypt hash valido!)
+-- ruolo: ADMIN
+```
+
+**Tempo Risoluzione**: ~40 minuti  
+**Metodo Risolutivo**: Creazione tramite API `/auth/register` invece di inserimento manuale SQL
+
+**Lezione Appresa**: 
+- ❌ **MAI inserire password manualmente nel database tramite SQL**
+- ✅ **SEMPRE usare API `/auth/register`** per creare utenti (admin inclusi)
+- ✅ Spring Security + BCrypt garantisce hash corretto automaticamente
+- ✅ Il backend hasha correttamente le password **solo tramite `AuthService.register()`**
+
+**Impatto**:
+- ✅ Sistema autenticazione **completamente funzionante**
+- ✅ Admin può ora accedere a `/admin-dashboard`
+- ✅ Pronto per implementazione funzionalità CRUD admin
+
+---
+
+**👤 CREDENZIALI UTENTI TEST AGGIORNATE:**
+
+### **Admin (NUOVO - Creato tramite API - FUNZIONANTE ✅)**:
+- **Email:** `admin@barbershop.com`
+- **Password:** `admin123`
+- **Ruolo:** `ADMIN`
+- **Metodo Creazione:** API `POST /auth/register` con BCrypt automatico
+- **ID Database:** 10
+- **Password Hash:** `$2a$10$eHQZf.k/hOEqMEhWZK5.Ou...` (BCrypt valido)
+
+### **Cliente (ESISTENTE - FUNZIONANTE ✅)**:
+- **Email:** `prova@gmail.com`
+- **Password:** `prova`
+- **Ruolo:** `CLIENTE`
