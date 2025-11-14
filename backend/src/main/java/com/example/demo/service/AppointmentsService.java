@@ -38,6 +38,9 @@ public class AppointmentsService {
     @Lazy
     private WaitingListService waitingListService;
 
+    @Autowired
+    private ShopHoursService shopHoursService;
+
     private static final int SLOT_INTERVAL_MINUTES = 5;
 
     @Transactional
@@ -122,54 +125,40 @@ public class AppointmentsService {
     public List<AvailableSlotResponse> getAvailableSlots(Long barberId, Long serviceId, LocalDate date) {
         List<AvailableSlotResponse> availableSlots = new ArrayList<>();
 
-        // Ottieni la disponibilità del barbiere per il giorno della settimana
+        // Ottieni giorno della settimana (0=Dom, 1=Lun, ..., 6=Sab)
         int dayOfWeek = date.getDayOfWeek().getValue() % 7; // 0=Dom, 1=Lun, ..., 6=Sab
-        List<Availability> availabilities = availabilityRepository.findByBarbiereIdAndGiorno(barberId, dayOfWeek);
 
-        if (availabilities.isEmpty()) {
-            return availableSlots; // Barbiere non disponibile in questo giorno
+        // Verifica orari apertura salone
+        if (!shopHoursService.getShopHoursByDay(dayOfWeek).isPresent()) {
+            return availableSlots; // Nessun orario configurato, ritorna lista vuota
         }
 
-        // Per semplicità, prendiamo la prima disponibilità (estendibile per gestire più fasce orarie)
-        Availability availability = availabilities.get(0);
-        LocalTime startTime = availability.getOrarioInizio();
-        LocalTime endTime = availability.getOrarioFine();
+        ShopHours shopHours = shopHoursService.getShopHoursByDay(dayOfWeek).get();
+
+        if (shopHours.getIsChiuso()) {
+            return availableSlots; // Salone chiuso quel giorno
+        }
+
+        // Usa orari salone invece di orari barbiere
+        LocalTime shopOpenTime = shopHours.getOrarioApertura();
+        LocalTime shopCloseTime = shopHours.getOrarioChiusura();
 
         // Ottieni la durata del servizio
         Services service = servicesRepository.findById(serviceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Servizio non trovato con ID: " + serviceId));
         int serviceDuration = service.getDurata();
 
-        // Ottieni tutti gli appuntamenti esistenti per quel barbiere in quella data
-        List<Appointments> existingAppointments = appointmentsRepository.findByBarberIdAndData(barberId, date);
-
-        // MODIFICA: Genera slot ogni 30 MINUTI invece di 5 minuti
-        LocalTime currentTime = startTime;
-        while (currentTime.plusMinutes(serviceDuration).isBefore(endTime) || 
-               currentTime.plusMinutes(serviceDuration).equals(endTime)) {
-            
-            LocalTime slotEndTime = currentTime.plusMinutes(serviceDuration);
-            boolean isAvailable = true;
-
-            // Verifica se questo slot si sovrappone con un appuntamento esistente
-            for (Appointments appointment : existingAppointments) {
-                LocalTime appointmentStart = appointment.getOrarioInizio();
-                LocalTime appointmentEnd = appointmentStart.plusMinutes(appointment.getService().getDurata());
-
-                // Controlla sovrapposizione
-                if (currentTime.isBefore(appointmentEnd) && slotEndTime.isAfter(appointmentStart)) {
-                    isAvailable = false;
-                    break;
-                }
+        // Genera slot disponibili ogni 5 minuti nell'intervallo di apertura
+        LocalTime slotTime = shopOpenTime;
+        while (slotTime.plusMinutes(serviceDuration).compareTo(shopCloseTime) <= 0) {
+            // Verifica se barbiere è disponibile a quest'orario
+            if (!isBarberAvailable(barberId, date, slotTime, slotTime.plusMinutes(serviceDuration))) {
+                availableSlots.add(new AvailableSlotResponse(slotTime, false));
+            } else {
+                availableSlots.add(new AvailableSlotResponse(slotTime, true));
             }
 
-            AvailableSlotResponse slot = new AvailableSlotResponse();
-            slot.setOrarioInizio(currentTime);
-            slot.setDisponibile(isAvailable);
-            availableSlots.add(slot);
-
-            // MODIFICA: Incrementa di 30 minuti invece di 5 minuti
-            currentTime = currentTime.plusMinutes(30);
+            slotTime = slotTime.plusMinutes(5);
         }
 
         return availableSlots;
@@ -189,6 +178,23 @@ public class AppointmentsService {
             LocalTime existingEnd = existingStart.plusMinutes(appointment.getService().getDurata());
 
             if (orarioInizio.isBefore(existingEnd) && orarioFine.isAfter(existingStart)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isBarberAvailable(Long barberId, LocalDate date, LocalTime startTime, LocalTime endTime) {
+        List<Appointments> appointments = appointmentsRepository
+                .findByBarberIdAndDataAndStato(barberId, date, Appointments.StatoAppuntamento.CONFIRMATO);
+
+        for (Appointments appointment : appointments) {
+            LocalTime appointmentStart = appointment.getOrarioInizio();
+            LocalTime appointmentEnd = appointmentStart.plusMinutes(appointment.getService().getDurata());
+
+            // Controlla sovrapposizione
+            if (startTime.isBefore(appointmentEnd) && endTime.isAfter(appointmentStart)) {
                 return false;
             }
         }
