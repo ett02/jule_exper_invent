@@ -51,7 +51,7 @@ public class BarbersService {
         barber.setNome(barberDetails.getNome());
         barber.setCognome(barberDetails.getCognome());
         barber.setEsperienza(barberDetails.getEsperienza());
-        barber.setSpecialità(barberDetails.getSpecialità());
+        barber.setSpecialita(barberDetails.getSpecialita());
         barber.setIsActive(barberDetails.getIsActive());
         
         return barbersRepository.save(barber);

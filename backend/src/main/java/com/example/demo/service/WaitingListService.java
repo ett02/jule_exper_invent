@@ -27,9 +27,6 @@ public class WaitingListService {
     @Autowired
     private ServicesRepository servicesRepository;
 
-    @Autowired
-    private AppointmentsService appointmentsService;
-
     @Transactional
     public WaitingList addToWaitingList(WaitingListRequest request) {
         Users customer = usersRepository.findById(request.getCustomerId())
@@ -57,44 +54,6 @@ public class WaitingListService {
     public List<WaitingList> getActiveWaitingListByBarberAndDate(Long barberId, java.time.LocalDate data) {
         return waitingListRepository.findByBarberIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
                 barberId, data, WaitingList.StatoListaAttesa.IN_ATTESA);
-    }
-
-    @Transactional
-    public void processWaitingListForCancelledAppointment(Appointments cancelledAppointment) {
-        // Trova il primo in lista d'attesa per quel barbiere, servizio e data
-        Optional<WaitingList> firstInQueue = waitingListRepository
-                .findFirstByBarberIdAndServiceIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
-                        cancelledAppointment.getBarber().getId(),
-                        cancelledAppointment.getService().getId(),
-                        cancelledAppointment.getData(),
-                        WaitingList.StatoListaAttesa.IN_ATTESA
-                );
-
-        if (firstInQueue.isPresent()) {
-            WaitingList waitingEntry = firstInQueue.get();
-
-            // Crea automaticamente l'appuntamento per il primo in coda
-            AppointmentRequest appointmentRequest = new AppointmentRequest();
-            appointmentRequest.setCustomerId(waitingEntry.getCustomer().getId());
-            appointmentRequest.setBarberId(waitingEntry.getBarber().getId());
-            appointmentRequest.setServiceId(waitingEntry.getService().getId());
-            appointmentRequest.setData(cancelledAppointment.getData());
-            appointmentRequest.setOrarioInizio(cancelledAppointment.getOrarioInizio());
-
-            try {
-                appointmentsService.createAppointment(appointmentRequest);
-
-                // Aggiorna lo stato nella lista d'attesa
-                waitingEntry.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
-                waitingListRepository.save(waitingEntry);
-
-                // TODO: Invia notifica al cliente (implementata in STEP 4)
-                System.out.println("Slot assegnato a: " + waitingEntry.getCustomer().getEmail());
-
-            } catch (Exception e) {
-                System.err.println("Errore nell'assegnazione automatica dello slot: " + e.getMessage());
-            }
-        }
     }
 
     @Transactional
