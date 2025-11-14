@@ -9,6 +9,5 @@ export interface Appointment {
     service: Service;
     data: Date;
     orarioInizio: string;
-    // --- MODIFICA QUESTA RIGA ---
-    stato: 'CONFIRMATO' | 'PENDING' | 'ANNULLATO' | 'IN_CORSO' | 'COMPLETATO';
+    stato: 'CONFERMATO' | 'PENDING' | 'ANNULLATO' | 'IN_CORSO' | 'COMPLETATO';
 }

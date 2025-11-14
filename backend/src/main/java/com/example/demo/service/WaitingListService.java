@@ -92,7 +92,7 @@ public class WaitingListService {
             
             newAppointment.setData(date);
             newAppointment.setOrarioInizio(waiting.getOrarioRichiesto() != null ? waiting.getOrarioRichiesto() : LocalTime.of(9, 0));
-            newAppointment.setStato(Appointments.StatoAppuntamento.CONFIRMATO);
+            newAppointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
             
             appointmentsRepository.save(newAppointment);
             

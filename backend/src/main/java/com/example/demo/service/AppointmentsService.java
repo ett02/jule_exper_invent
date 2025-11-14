@@ -174,7 +174,7 @@ public class AppointmentsService {
         
         appointment.setData(request.getData());
         appointment.setOrarioInizio(request.getOrarioInizio());
-        appointment.setStato(Appointments.StatoAppuntamento.CONFIRMATO);
+        appointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
 
         Appointments saved = appointmentsRepository.save(appointment);
         System.out.println("✅ Appuntamento creato: " + saved.getId());

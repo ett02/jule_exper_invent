@@ -47,7 +47,7 @@
               </div>
               <div class="app-status">
                 <span class="status-badge" [class]="'status-badge-' + app.stato.toLowerCase()">{{ app.stato }}</span>
-                <div class="status-actions" *ngIf="app.stato === 'CONFIRMATO'">
+                <div class="status-actions" *ngIf="app.stato === 'CONFERMATO'">
                   <button class="btn-status-start" (click)="setAppointmentStatus(app, 'IN_CORSO')">Inizia</button>
                 </div>
                 <div class="status-actions" *ngIf="app.stato === 'IN_CORSO'">
