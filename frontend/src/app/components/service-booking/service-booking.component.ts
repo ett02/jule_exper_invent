@@ -293,4 +293,10 @@ export class ServiceBookingComponent implements OnInit {
       default: return false;
     }
   }
+
+  formatTimeWithoutSeconds(time: string): string {
+    if (!time) return '';
+    // Rimuove i secondi dall'orario (es. 09:45:00 -> 09:45)
+    return time.substring(0, 5);
+  }
 }

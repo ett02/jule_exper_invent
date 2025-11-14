@@ -1,7 +1,7 @@
 <div class="booking-container">
   <div class="booking-header">
     <button class="btn-back-home" (click)="goBackToDashboard()">
-      ← Indietro
+      ← Torna alla Home
     </button>
     <h1>💈 Prenota il Tuo Servizio</h1>
     <p class="subtitle">{{ selectedService?.nome || 'Seleziona servizio' }}</p>
@@ -121,7 +121,7 @@
              [class.unavailable]="!slot.available"
              [class.selected]="selectedTime?.time === slot.time"
              (click)="selectTime(slot)">
-          <span class="slot-time">{{ slot.time }}</span>
+          <span class="slot-time">{{ formatTimeWithoutSeconds(slot.time) }}</span>
           <span class="slot-status" *ngIf="!slot.available">❌</span>
           <span class="slot-status" *ngIf="slot.available && selectedTime?.time === slot.time">✅</span>
         </div>
@@ -136,7 +136,7 @@
     </div>
   </div>
 
-  <div class="booking-summary" *ngIf="selectedService && selectedBarber && selectedDate && selectedTime">
+  <div class="booking-summary" *ngIf="currentStep === 5 && selectedService && selectedBarber && selectedDate && selectedTime">
     <div class="summary-card">
       <h3>📋 Riepilogo Prenotazione</h3>
       <div class="summary-details">
@@ -154,7 +154,7 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">Orario:</span>
-          <span class="summary-value">{{ selectedTime?.time }}</span>
+          <span class="summary-value">{{ formatTimeWithoutSeconds(selectedTime?.time || '') }}</span>
         </div>
         <div class="summary-row">
           <span class="summary-label">Durata:</span>
@@ -169,12 +169,15 @@
         ✅ Conferma Prenotazione
       </button>
     </div>
+
+    <div class="navigation-buttons">
+      <button class="btn btn-secondary" (click)="previousStep()">
+        ← Indietro
+      </button>
+    </div>
   </div>
 
-  <div class="navigation-buttons">
-    <button class="btn btn-outline" (click)="goBackToDashboard()">
-      ← Torna alla Dashboard
-    </button>
+  <div class="navigation-buttons" *ngIf="currentStep !== 5">
     <button class="btn btn-secondary" *ngIf="currentStep > 1" (click)="previousStep()">
       ← Indietro
     </button>
