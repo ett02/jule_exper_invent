@@ -29,6 +29,12 @@ public class WaitingListService {
     @Autowired
     private ServicesRepository servicesRepository;
 
+    /**
+     * Adds a customer to the waiting list.
+     *
+     * @param request the waiting list request
+     * @return the waiting list entry
+     */
     @Transactional
     public WaitingList addToWaitingList(WaitingListRequest request) {
         Users customer = usersRepository.findById(request.getCustomerId())
@@ -49,15 +55,33 @@ public class WaitingListService {
         return waitingListRepository.save(waitingList);
     }
 
+    /**
+     * Gets the waiting list for a customer.
+     *
+     * @param customerId the customer id
+     * @return the list of waiting list entries
+     */
     public List<WaitingList> getWaitingListByCustomer(Long customerId) {
         return waitingListRepository.findByCustomerId(customerId);
     }
 
+    /**
+     * Gets the active waiting list for a barber and date.
+     *
+     * @param barberId the barber id
+     * @param data     the date
+     * @return the list of waiting list entries
+     */
     public List<WaitingList> getActiveWaitingListByBarberAndDate(Long barberId, java.time.LocalDate data) {
         return waitingListRepository.findByBarberIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
                 barberId, data, WaitingList.StatoListaAttesa.IN_ATTESA);
     }
 
+    /**
+     * Cancels a waiting list entry.
+     *
+     * @param id the waiting list entry id
+     */
     @Transactional
     public void cancelWaitingListEntry(Long id) {
         WaitingList entry = waitingListRepository.findById(id)
@@ -66,6 +90,12 @@ public class WaitingListService {
         waitingListRepository.save(entry);
     }
 
+    /**
+     * Gets the position of a customer in the waiting list.
+     *
+     * @param waitingListId the waiting list entry id
+     * @return the position in the queue
+     */
     public Integer getPositionInQueue(Long waitingListId) {
         WaitingList entry = waitingListRepository.findById(waitingListId)
                 .orElseThrow(() -> new RuntimeException("Voce lista d'attesa non trovata"));

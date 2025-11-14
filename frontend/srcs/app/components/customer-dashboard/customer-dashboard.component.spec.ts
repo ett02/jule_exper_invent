@@ -12,18 +12,14 @@ describe('CustomerDashboardComponent', () => {
   let apiService: ApiService;
 
   const authServiceMock = {
-    getDecodedToken: () => ({ id: 1, sub: 'test@test.com' })
+    getDecodedToken: () => ({ id: 1, sub: 'test@test.com' }),
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, CustomerDashboardComponent],
-      providers: [
-        ApiService,
-        { provide: AuthService, useValue: authServiceMock }
-      ]
-    })
-    .compileComponents();
+      providers: [ApiService, { provide: AuthService, useValue: authServiceMock }],
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -39,8 +35,24 @@ describe('CustomerDashboardComponent', () => {
 
   it('should load appointments on init', () => {
     const dummyAppointments: Appointment[] = [
-      { id: 1, customer: {} as any, barber: {} as any, service: {} as any, data: new Date('2022-01-01'), orarioInizio: '10:00', stato: 'CONFIRMATO' },
-      { id: 2, customer: {} as any, barber: {} as any, service: {} as any, data: new Date('2022-01-02'), orarioInizio: '11:00', stato: 'CONFIRMATO' }
+      {
+        id: 1,
+        customer: {} as any,
+        barber: {} as any,
+        service: {} as any,
+        data: new Date('2022-01-01'),
+        orarioInizio: '10:00',
+        stato: 'CONFIRMATO',
+      },
+      {
+        id: 2,
+        customer: {} as any,
+        barber: {} as any,
+        service: {} as any,
+        data: new Date('2022-01-02'),
+        orarioInizio: '11:00',
+        stato: 'CONFIRMATO',
+      },
     ];
     spyOn(apiService, 'getAppointmentsByUserId').and.returnValue(of(dummyAppointments));
     component.ngOnInit();

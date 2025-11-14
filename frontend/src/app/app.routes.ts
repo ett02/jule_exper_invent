@@ -7,11 +7,11 @@ import { ServiceBookingComponent } from './components/service-booking/service-bo
 import { AppointmentListComponent } from './components/appointment-list/appointment-list.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'login', pathMatch: 'full' },
-    { path: 'login', component: LoginComponent },
-    { path: 'register', component: RegisterComponent },
-    { path: 'admin-dashboard', component: AdminDashboardComponent },
-    { path: 'customer-dashboard', component: CustomerDashboardComponent },
-    { path: 'book', component: ServiceBookingComponent },
-    { path: 'appointments', component: AppointmentListComponent },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'admin-dashboard', component: AdminDashboardComponent },
+  { path: 'customer-dashboard', component: CustomerDashboardComponent },
+  { path: 'book', component: ServiceBookingComponent },
+  { path: 'appointments', component: AppointmentListComponent },
 ];
