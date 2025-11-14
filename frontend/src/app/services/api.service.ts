@@ -6,6 +6,7 @@ import { Barber } from '../models/barber.model';
 import { Appointment } from '../models/appointment.model';
 import { Availability } from '../models/availability.model';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -39,6 +40,15 @@ export class ApiService {
 
   deleteBarber(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/barbers/${id}`);
+  }
+
+  updateAppointmentStatus(id: number, status: string): Observable<Appointment> {
+    return this.http.put<Appointment>(`${this.apiUrl}/appointments/${id}/status`, { status });
+  }
+
+
+  getAppointmentsByDate(date: string): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/by-date`, { params: { date } });
   }
 
   // Customer facing methods

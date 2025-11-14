@@ -17,18 +17,23 @@ export class RegisterComponent {
     cognome: '',
     email: '',
     password: '',
-    ruolo: 'CLIENTE'
+    ruolo: 'CLIENTE' // Default role
   };
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router) {}
 
   register() {
+    console.log('Registrazione utente:', this.user);
+    
     this.authService.register(this.user).subscribe(
-      () => {
+      (response) => {
+        console.log('Registrazione completata:', response);
+        alert('Registrazione avvenuta con successo! Ora puoi effettuare il login.');
         this.router.navigate(['/login']);
       },
-      (error: any) => {
-        console.error('Registration failed', error);
+      (error) => {
+        console.error('Errore durante la registrazione:', error);
+        alert('Errore durante la registrazione: ' + (error.error?.message || 'Riprova più tardi'));
       }
     );
   }

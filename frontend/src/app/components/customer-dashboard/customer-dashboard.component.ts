@@ -3,6 +3,7 @@ import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AppointmentService } from '../../services/appointment.service';
 
 @Component({
   selector: 'app-customer-dashboard',
@@ -19,6 +20,7 @@ export class CustomerDashboardComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
+    private appointmentService: AppointmentService,
     private router: Router
   ) {}
 
@@ -88,6 +90,13 @@ export class CustomerDashboardComponent implements OnInit {
           console.error('Error removing from waiting list:', error);
         }
       );
+    }
+  }
+
+  logout(): void {
+    if (confirm('Sei sicuro di voler uscire?')) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
     }
   }
 }
