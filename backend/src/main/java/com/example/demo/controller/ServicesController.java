@@ -41,7 +41,7 @@ public class ServicesController {
 
     @GetMapping("/{id}")
     public Services getServiceById(@PathVariable @NonNull Long id) {
-        return servicesService.getServiceById(id);
+        return servicesService.getServiceById(id).orElse(null);
     }
     
     // Questo era il metodo che abbiamo aggiunto in precedenza

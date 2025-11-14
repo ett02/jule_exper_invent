@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -27,53 +27,28 @@ interface WeekDay {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.css']
+  styleUrls: ['./admin-dashboard.component.css'],
 })
 export class AdminDashboardComponent implements OnInit {
-  
-  // --- NUOVA LOGICA PER LE VISTE ---
-  currentView: 'dashboard' | 'servizi' | 'barbieri' | 'orari' = 'dashboard';
+  private apiService = inject(ApiService);
 
-  // --- Proprietà per Appuntamenti ---
-  todaysAppointments: Appointment[] = [];
-  selectedDate: string;
-
-  // --- Proprietà per i Servizi ---
   services: Service[] = [];
   serviceForm: Partial<Service> = {};
   isEditingService = false;
 
-  // --- Proprietà per i Barbieri ---
-  barbers: Barber[] = [];
-  barberForm: Partial<Barber> = {};
-  isEditingBarber = false;
-
-  // --- Proprietà per gli Orari Salone ---
-  weekDays: WeekDay[] = [
-    { value: 1, name: 'Lunedì', hours: null },
-    { value: 2, name: 'Martedì', hours: null },
-    { value: 3, name: 'Mercoledì', hours: null },
-    { value: 4, name: 'Giovedì', hours: null },
-    { value: 5, name: 'Venerdì', hours: null },
-    { value: 6, name: 'Sabato', hours: null },
-    { value: 0, name: 'Domenica', hours: null }
-  ];
-  showShopHoursModal = false;
-  selectedDay: number | null = null;
-  shopHoursForm = {
-    giorno: 0,
-    orarioApertura: '09:00',
-    orarioChiusura: '19:00',
-    isChiuso: false
+  newService: Partial<Service> = {
+    nome: '',
+    durata: 0,
+    prezzo: 0,
+    descrizione: '',
   };
 
-  constructor(
-    private apiService: ApiService,
-    private http: HttpClient,
-    private router: Router
-  ) {
-    this.selectedDate = new Date().toISOString().split('T')[0];
-  }
+  newBarber: Partial<Barber> = {
+    nome: '',
+    cognome: '',
+    esperienza: '',
+    specialita: '',
+  };
 
   ngOnInit(): void {
     // Carichiamo tutto all'avvio, così le sezioni sono pronte
@@ -83,30 +58,12 @@ export class AdminDashboardComponent implements OnInit {
     this.loadAppointmentsByDate(this.selectedDate); 
   }
 
-  // --- NUOVO METODO PER CAMBIARE VISTA ---
-  changeView(view: 'dashboard' | 'servizi' | 'barbieri' | 'orari'): void {
-    this.currentView = view;
+  loadServices(): void {
+    this.apiService.getAllServices().subscribe((data: Service[]) => (this.services = data));
   }
 
-  // ===================================================
-  // --- GESTIONE APPUNTAMENTI ---
-  // ===================================================
-
-  loadAppointmentsByDate(date: string): void {
-    this.apiService.getAppointmentsByDate(date).subscribe(
-      (data) => {
-        this.todaysAppointments = data;
-      },
-      (error) => {
-        console.error('Errore caricamento appuntamenti:', error);
-      }
-    );
-  }
-
-  onDateChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.selectedDate = input.value;
-    this.loadAppointmentsByDate(this.selectedDate);
+  loadBarbers(): void {
+    this.apiService.getAllBarbers().subscribe((data: Barber[]) => (this.barbers = data));
   }
 
   setAppointmentStatus(app: Appointment, status: 'IN_CORSO' | 'COMPLETATO'): void {

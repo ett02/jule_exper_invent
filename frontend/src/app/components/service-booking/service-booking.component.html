@@ -32,7 +32,13 @@
   <div class="booking-step" *ngIf="currentStep === 1 && !selectedService">
     <h2>Scegli il Servizio</h2>
     <div class="services-grid">
-      <div class="service-card" *ngFor="let service of services" (click)="selectService(service)">
+      <div
+        class="service-card"
+        *ngFor="let service of services"
+        (click)="selectService(service)"
+        (keyup.enter)="selectService(service)"
+        tabindex="0"
+      >
         <div class="service-icon">✂️</div>
         <h3>{{ service.nome }}</h3>
         <p class="service-description">{{ service.descrizione }}</p>
@@ -47,7 +53,14 @@
   <div class="booking-step" *ngIf="currentStep === 2">
     <h2>Scegli il Barbiere</h2>
     <div class="barbers-grid">
-      <div class="barber-card" *ngFor="let barber of barbers" (click)="selectBarber(barber)" [class.selected]="selectedBarber?.id === barber.id">
+      <div
+        class="barber-card"
+        *ngFor="let barber of barbers"
+        (click)="selectBarber(barber)"
+        (keyup.enter)="selectBarber(barber)"
+        [class.selected]="selectedBarber?.id === barber.id"
+        tabindex="0"
+      >
         <div class="barber-avatar">
           <span class="avatar-icon">👨‍💼</span>
         </div>
@@ -68,43 +81,14 @@
     <div class="calendar-container">
       <div class="calendar-wrapper">
         <label for="date-input" class="calendar-label">📅 Seleziona una data</label>
-        
-        <div class="month-selector">
-          <button class="btn-month-nav" (click)="previousMonth()">←</button>
-          <span class="current-month">{{ currentMonthDisplay }}</span>
-          <button class="btn-month-nav" (click)="nextMonth()">→</button>
-        </div>
-        
-        <div class="calendar-grid">
-          <div class="calendar-weekday" *ngFor="let day of weekDays">{{ day }}</div>
-          <div 
-            class="calendar-day" 
-            *ngFor="let day of calendarDays"
-            [class.available]="day.available"
-            [class.unavailable]="!day.available"
-            [class.selected]="day.selected"
-            [class.today]="day.isToday"
-            [class.empty]="day.isEmpty"
-            (click)="selectDate(day)"
-          >
-            <span *ngIf="!day.isEmpty">{{ day.number }}</span>
-          </div>
-        </div>
-        
-        <div class="calendar-legend">
-          <div class="legend-item">
-            <span class="legend-color available"></span>
-            <span>Disponibile</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color unavailable"></span>
-            <span>Chiuso/Non disponibile</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color selected"></span>
-            <span>Selezionato</span>
-          </div>
-        </div>
+        <input
+          type="date"
+          id="date-input"
+          class="date-picker"
+          [(ngModel)]="selectedDate"
+          (change)="onDateChange()"
+          [min]="minDate"
+        />
       </div>
     </div>
   </div>
@@ -115,13 +99,17 @@
     
     <div class="time-slots-container">
       <div class="time-slots-grid">
-        <div class="time-slot" 
-             *ngFor="let slot of availableSlots" 
-             [class.available]="slot.available" 
-             [class.unavailable]="!slot.available"
-             [class.selected]="selectedTime?.time === slot.time"
-             (click)="selectTime(slot)">
-          <span class="slot-time">{{ formatTimeWithoutSeconds(slot.time) }}</span>
+        <div
+          class="time-slot"
+          *ngFor="let slot of availableSlots"
+          [class.available]="slot.available"
+          [class.unavailable]="!slot.available"
+          [class.selected]="selectedTime === slot.time"
+          (click)="selectTimeSlot(slot)"
+          (keyup.enter)="selectTimeSlot(slot)"
+          tabindex="0"
+        >
+          <span class="slot-time">{{ slot.time }}</span>
           <span class="slot-status" *ngIf="!slot.available">❌</span>
           <span class="slot-status" *ngIf="slot.available && selectedTime?.time === slot.time">✅</span>
         </div>
@@ -136,7 +124,11 @@
     </div>
   </div>
 
-  <div class="booking-summary" *ngIf="currentStep === 5 && selectedService && selectedBarber && selectedDate && selectedTime">
+  <!-- Riepilogo e Conferma -->
+  <div
+    class="booking-summary"
+    *ngIf="selectedService && selectedBarber && selectedDate && selectedTime"
+  >
     <div class="summary-card">
       <h3>📋 Riepilogo Prenotazione</h3>
       <div class="summary-details">
@@ -150,7 +142,7 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">Data:</span>
-          <span class="summary-value">{{ selectedDate | date:'dd/MM/yyyy' }}</span>
+          <span class="summary-value">{{ selectedDate | date: 'dd/MM/yyyy' }}</span>
         </div>
         <div class="summary-row">
           <span class="summary-label">Orario:</span>

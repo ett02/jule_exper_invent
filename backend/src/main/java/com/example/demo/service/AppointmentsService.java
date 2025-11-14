@@ -33,26 +33,20 @@ public class AppointmentsService {
     @Autowired
     private WaitingListRepository waitingListRepository;
 
-    public List<AvailableSlotResponse> getAvailableSlots(Long barberId, Long serviceId, LocalDate date) {
-        System.out.println("====================================");
-        System.out.println("GET AVAILABLE SLOTS");
-        System.out.println("BarberId: " + barberId);
-        System.out.println("ServiceId: " + serviceId);
-        System.out.println("Date: " + date);
-        System.out.println("====================================");
-        
-        List<AvailableSlotResponse> availableSlots = new ArrayList<>();
-
         // Calculate day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
         int dayOfWeek = date.getDayOfWeek().getValue() % 7;
         System.out.println("Day of week: " + dayOfWeek);
 
-        // Get shop hours for this day
-        Optional<ShopHours> shopHoursOpt = shopHoursService.getShopHoursByDay(dayOfWeek);
-        
-        if (shopHoursOpt.isEmpty()) {
-            System.out.println("❌ NO SHOP HOURS configured for day: " + dayOfWeek);
-            return availableSlots; // Empty list
+    /**
+     * Creates a new appointment.
+     *
+     * @param request the appointment request
+     * @return the created appointment
+     */
+    @Transactional
+    public Appointments createAppointment(AppointmentRequest request) {
+        if (!isSlotAvailable(request.getBarberId(), request.getData(), request.getOrarioInizio(), request.getServiceId())) {
+            throw new RuntimeException("Slot non disponibile");
         }
 
         Users customer = getEntityById(usersRepository, request.getCustomerId(), "Cliente non trovato");
@@ -78,39 +72,56 @@ public class AppointmentsService {
         return repository.findById(id).orElseThrow(() -> new RuntimeException(errorMessage));
     }
 
+    private <T, ID> T getEntityById(JpaRepository<T, ID> repository, ID id, String errorMessage) {
+        return repository.findById(id).orElseThrow(() -> new RuntimeException(errorMessage));
+    }
+
+    /**
+     * Gets all appointments for a user.
+     *
+     * @param userId the user id
+     * @return the list of appointments
+     */
     public List<Appointments> getAppointmentsByUser(Long userId) {
         return appointmentsRepository.findByCustomerId(userId);
     }
 
-        // Generate slots based on SERVICE DURATION (not every 5 minutes)
-        LocalTime slotTime = shopOpenTime;
-        int slotCount = 0;
-        
-        while (slotTime.plusMinutes(serviceDuration).compareTo(shopCloseTime) <= 0) {
-            boolean isAvailable = isBarberAvailable(barberId, date, slotTime, slotTime.plusMinutes(serviceDuration));
-            
-            availableSlots.add(new AvailableSlotResponse(slotTime, isAvailable));
-            slotCount++;
-            
-            // Increment by service duration
-            slotTime = slotTime.plusMinutes(serviceDuration);
-        }
-
-        System.out.println("====================================");
-        System.out.println("✅ TOTAL SLOTS GENERATED: " + slotCount);
-        if (slotCount > 0) {
-            System.out.println("First slot: " + availableSlots.get(0).getOrario());
-            System.out.println("Last slot: " + availableSlots.get(slotCount - 1).getOrario());
-            
-            long available = availableSlots.stream().filter(AvailableSlotResponse::isDisponibile).count();
-            long occupied = slotCount - available;
-            System.out.println("Available: " + available + ", Occupied: " + occupied);
-        }
-        System.out.println("====================================");
-
-        return availableSlots;
+    /**
+     * Gets all appointments for a barber.
+     *
+     * @param barberId the barber id
+     * @return the list of appointments
+     */
+    public List<Appointments> getAppointmentsByBarber(Long barberId) {
+        return appointmentsRepository.findByBarberId(barberId);
     }
 
+    /**
+     * Gets an appointment by id.
+     *
+     * @param id the appointment id
+     * @return the appointment
+     */
+    public Optional<Appointments> getAppointmentById(Long id) {
+        return appointmentsRepository.findById(id);
+    }
+
+    /**
+     * Gets all appointments.
+     *
+     * @return the list of appointments
+     */
+    public List<Appointments> getAllAppointments() {
+        return appointmentsRepository.findAll();
+    }
+
+    /**
+     * Updates an appointment.
+     *
+     * @param id      the appointment id
+     * @param request the appointment request
+     * @return the updated appointment
+     */
     @Transactional
     public Appointments updateAppointment(Long id, AppointmentRequest request) {
         Appointments appointment = getEntityById(appointmentsRepository, id, "Appuntamento non trovato");
@@ -120,12 +131,8 @@ public class AppointmentsService {
             return true;
         }
 
-        for (Appointments appointment : existingAppointments) {
-            // Skip cancelled appointments
-            if (appointment.getStato() == Appointments.StatoAppuntamento.ANNULLATO) {
-                System.out.println("Skipping cancelled appointment: " + appointment.getId());
-                continue;
-            }
+        Barbers barber = getEntityById(barbersRepository, request.getBarberId(), "Barbiere non trovato");
+        Services service = getEntityById(servicesRepository, request.getServiceId(), "Servizio non trovato");
 
             LocalTime existingStart = appointment.getOrarioInizio();
             
@@ -167,6 +174,11 @@ public class AppointmentsService {
         return saved;
     }
 
+    /**
+     * Cancels an appointment.
+     *
+     * @param id the appointment id
+     */
     @Transactional
     public void cancelAppointment(Long id) {
         Appointments appointment = appointmentsRepository.findById(id)
@@ -209,6 +221,26 @@ public class AppointmentsService {
             } catch (Exception e) {
                 System.err.println("Error in the automatic assignment of the slot: " + e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Gets the available slots for a barber, service, and date.
+     *
+     * @param barberId  the barber id
+     * @param serviceId the service id
+     * @param date      the date
+     * @return the list of available slots
+     */
+    public List<AvailableSlotResponse> getAvailableSlots(Long barberId, Long serviceId, LocalDate date) {
+        List<AvailableSlotResponse> slots = new ArrayList<>();
+
+        int dayOfWeek = date.getDayOfWeek().getValue() % 7;
+
+        List<Availability> availabilities = availabilityRepository.findByBarberIdAndGiorno(barberId, dayOfWeek);
+
+        if (availabilities.isEmpty()) {
+            return slots;
         }
     }
 
