@@ -39,6 +39,12 @@ public class AppointmentsService {
 
     private static final int SLOT_INTERVAL_MINUTES = 5;
 
+    /**
+     * Creates a new appointment.
+     *
+     * @param request the appointment request
+     * @return the created appointment
+     */
     @Transactional
     public Appointments createAppointment(AppointmentRequest request) {
         if (!isSlotAvailable(request.getBarberId(), request.getData(), request.getOrarioInizio(), request.getServiceId())) {
@@ -64,22 +70,52 @@ public class AppointmentsService {
         return repository.findById(id).orElseThrow(() -> new RuntimeException(errorMessage));
     }
 
+    /**
+     * Gets all appointments for a user.
+     *
+     * @param userId the user id
+     * @return the list of appointments
+     */
     public List<Appointments> getAppointmentsByUser(Long userId) {
         return appointmentsRepository.findByCustomerId(userId);
     }
 
+    /**
+     * Gets all appointments for a barber.
+     *
+     * @param barberId the barber id
+     * @return the list of appointments
+     */
     public List<Appointments> getAppointmentsByBarber(Long barberId) {
         return appointmentsRepository.findByBarberId(barberId);
     }
 
+    /**
+     * Gets an appointment by id.
+     *
+     * @param id the appointment id
+     * @return the appointment
+     */
     public Optional<Appointments> getAppointmentById(Long id) {
         return appointmentsRepository.findById(id);
     }
 
+    /**
+     * Gets all appointments.
+     *
+     * @return the list of appointments
+     */
     public List<Appointments> getAllAppointments() {
         return appointmentsRepository.findAll();
     }
 
+    /**
+     * Updates an appointment.
+     *
+     * @param id      the appointment id
+     * @param request the appointment request
+     * @return the updated appointment
+     */
     @Transactional
     public Appointments updateAppointment(Long id, AppointmentRequest request) {
         Appointments appointment = getEntityById(appointmentsRepository, id, "Appuntamento non trovato");
@@ -99,6 +135,11 @@ public class AppointmentsService {
         return appointmentsRepository.save(appointment);
     }
 
+    /**
+     * Cancels an appointment.
+     *
+     * @param id the appointment id
+     */
     @Transactional
     public void cancelAppointment(Long id) {
         Appointments appointment = appointmentsRepository.findById(id)
@@ -144,6 +185,14 @@ public class AppointmentsService {
         }
     }
 
+    /**
+     * Gets the available slots for a barber, service, and date.
+     *
+     * @param barberId  the barber id
+     * @param serviceId the service id
+     * @param date      the date
+     * @return the list of available slots
+     */
     public List<AvailableSlotResponse> getAvailableSlots(Long barberId, Long serviceId, LocalDate date) {
         List<AvailableSlotResponse> slots = new ArrayList<>();
 

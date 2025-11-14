@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,9 +10,11 @@ import { Barber } from '../../models/barber.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.css']
+  styleUrls: ['./admin-dashboard.component.css'],
 })
 export class AdminDashboardComponent implements OnInit {
+  private apiService = inject(ApiService);
+
   services: Service[] = [];
   barbers: Barber[] = [];
 
@@ -20,17 +22,15 @@ export class AdminDashboardComponent implements OnInit {
     nome: '',
     durata: 0,
     prezzo: 0,
-    descrizione: ''
+    descrizione: '',
   };
 
   newBarber: Partial<Barber> = {
     nome: '',
     cognome: '',
     esperienza: '',
-    specialita: ''
+    specialita: '',
   };
-
-  constructor(private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.loadServices();
@@ -38,11 +38,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadServices(): void {
-    this.apiService.getAllServices().subscribe((data: Service[]) => this.services = data);
+    this.apiService.getAllServices().subscribe((data: Service[]) => (this.services = data));
   }
 
   loadBarbers(): void {
-    this.apiService.getAllBarbers().subscribe((data: Barber[]) => this.barbers = data);
+    this.apiService.getAllBarbers().subscribe((data: Barber[]) => (this.barbers = data));
   }
 
   createService(): void {

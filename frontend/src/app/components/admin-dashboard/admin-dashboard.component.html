@@ -5,17 +5,34 @@
     <h2>Servizi</h2>
     <ul class="item-list">
       <li *ngFor="let service of services">
-        <span>{{ service.nome }} - {{ service.prezzo | number:'1.2-2' }} €</span>
+        <span>{{ service.nome }} - {{ service.prezzo | number: '1.2-2' }} €</span>
         <button (click)="deleteService(service.id)">Elimina</button>
       </li>
     </ul>
     <div class="form-container">
       <h3>Aggiungi Servizio</h3>
       <form (ngSubmit)="createService()">
-        <input type="text" [(ngModel)]="newService.nome" name="nome" placeholder="Nome" required>
-        <input type="number" [(ngModel)]="newService.prezzo" name="prezzo" placeholder="Prezzo" required>
-        <input type="number" [(ngModel)]="newService.durata" name="durata" placeholder="Durata (minuti)" required>
-        <input type="text" [(ngModel)]="newService.descrizione" name="descrizione" placeholder="Descrizione">
+        <input type="text" [(ngModel)]="newService.nome" name="nome" placeholder="Nome" required />
+        <input
+          type="number"
+          [(ngModel)]="newService.prezzo"
+          name="prezzo"
+          placeholder="Prezzo"
+          required
+        />
+        <input
+          type="number"
+          [(ngModel)]="newService.durata"
+          name="durata"
+          placeholder="Durata (minuti)"
+          required
+        />
+        <input
+          type="text"
+          [(ngModel)]="newService.descrizione"
+          name="descrizione"
+          placeholder="Descrizione"
+        />
         <button type="submit">Aggiungi</button>
       </form>
     </div>
@@ -32,10 +49,26 @@
     <div class="form-container">
       <h3>Aggiungi Barbiere</h3>
       <form (ngSubmit)="createBarber()">
-        <input type="text" [(ngModel)]="newBarber.nome" name="b_nome" placeholder="Nome" required>
-        <input type="text" [(ngModel)]="newBarber.cognome" name="cognome" placeholder="Cognome" required>
-        <input type="text" [(ngModel)]="newBarber.esperienza" name="esperienza" placeholder="Esperienza">
-        <input type="text" [(ngModel)]="newBarber.specialita" name="specialita" placeholder="Specialità">
+        <input type="text" [(ngModel)]="newBarber.nome" name="b_nome" placeholder="Nome" required />
+        <input
+          type="text"
+          [(ngModel)]="newBarber.cognome"
+          name="cognome"
+          placeholder="Cognome"
+          required
+        />
+        <input
+          type="text"
+          [(ngModel)]="newBarber.esperienza"
+          name="esperienza"
+          placeholder="Esperienza"
+        />
+        <input
+          type="text"
+          [(ngModel)]="newBarber.specialita"
+          name="specialita"
+          placeholder="Specialità"
+        />
         <button type="submit">Aggiungi</button>
       </form>
     </div>

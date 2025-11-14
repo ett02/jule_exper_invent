@@ -1,7 +1,7 @@
 export interface User {
-    id: number;
-    nome: string;
-    cognome: string;
-    email: string;
-    ruolo: 'CLIENTE' | 'ADMIN';
+  id: number;
+  nome: string;
+  cognome: string;
+  email: string;
+  ruolo: 'CLIENTE' | 'ADMIN';
 }

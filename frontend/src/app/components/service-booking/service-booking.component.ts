@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
@@ -6,40 +6,37 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Service } from '../../models/service.model';
 import { Barber } from '../../models/barber.model';
-import { Availability } from '../../models/availability.model';
-import { Appointment } from '../../models/appointment.model';
+import { AvailableSlot } from '../../models/available-slot.model';
 
 @Component({
   selector: 'app-service-booking',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './service-booking.component.html',
-  styleUrls: ['./service-booking.component.css']
+  styleUrls: ['./service-booking.component.css'],
 })
 export class ServiceBookingComponent implements OnInit {
-  currentStep: number = 1;
-  services: Service[] = [];
-  barbers: any[] = [];
-  availableSlots: any[] = [];
-  
-  selectedService: Service | null = null;
-  selectedBarber: any = null;
-  selectedDate: string = '';
-  selectedTime: string = '';
-  
-  minDate: string = '';
+  private apiService = inject(ApiService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    private apiService: ApiService,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  currentStep = 1;
+  services: Service[] = [];
+  barbers: Barber[] = [];
+  availableSlots: AvailableSlot[] = [];
+
+  selectedService: Service | null = null;
+  selectedBarber: Barber | null = null;
+  selectedDate = '';
+  selectedTime = '';
+
+  minDate = '';
 
   ngOnInit(): void {
     // Set minimum date to today
     const today = new Date();
     this.minDate = today.toISOString().split('T')[0];
-    
+
     // Check if service was passed from customer dashboard
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state?.['service']) {
@@ -58,7 +55,7 @@ export class ServiceBookingComponent implements OnInit {
       },
       (error) => {
         console.error('Error loading services:', error);
-      }
+      },
     );
   }
 
@@ -67,9 +64,33 @@ export class ServiceBookingComponent implements OnInit {
       // TODO: Call API GET /barbers/service/{serviceId}
       // Mock data for now
       this.barbers = [
-        { id: 1, nome: 'Marco', cognome: 'Bianchi', esperienza: '8 anni', specialita: 'Tagli classici e moderni' },
-        { id: 2, nome: 'Luca', cognome: 'Verdi', esperienza: '5 anni', specialita: 'Specialista barba' },
-        { id: 3, nome: 'Giuseppe', cognome: 'Neri', esperienza: '10 anni', specialita: 'Tagli moderni e sfumature' }
+        {
+          id: 1,
+          nome: 'Marco',
+          cognome: 'Bianchi',
+          esperienza: '8 anni',
+          specialita: 'Tagli classici e moderni',
+          is_active: true,
+          user_id: 1,
+        },
+        {
+          id: 2,
+          nome: 'Luca',
+          cognome: 'Verdi',
+          esperienza: '5 anni',
+          specialita: 'Specialista barba',
+          is_active: true,
+          user_id: 2,
+        },
+        {
+          id: 3,
+          nome: 'Giuseppe',
+          cognome: 'Neri',
+          esperienza: '10 anni',
+          specialita: 'Tagli moderni e sfumature',
+          is_active: true,
+          user_id: 3,
+        },
       ];
     }
   }
@@ -87,7 +108,7 @@ export class ServiceBookingComponent implements OnInit {
         { time: '11:30', available: false },
         { time: '14:00', available: true },
         { time: '14:30', available: true },
-        { time: '15:00', available: true }
+        { time: '15:00', available: true },
       ];
     }
   }
@@ -98,7 +119,7 @@ export class ServiceBookingComponent implements OnInit {
     this.loadBarbers();
   }
 
-  selectBarber(barber: any): void {
+  selectBarber(barber: Barber): void {
     this.selectedBarber = barber;
     this.nextStep();
   }
@@ -108,7 +129,7 @@ export class ServiceBookingComponent implements OnInit {
     this.nextStep();
   }
 
-  selectTimeSlot(slot: any): void {
+  selectTimeSlot(slot: AvailableSlot): void {
     if (slot.available) {
       this.selectedTime = slot.time;
     }
@@ -116,11 +137,16 @@ export class ServiceBookingComponent implements OnInit {
 
   canProceed(): boolean {
     switch (this.currentStep) {
-      case 1: return !!this.selectedService;
-      case 2: return !!this.selectedBarber;
-      case 3: return !!this.selectedDate;
-      case 4: return !!this.selectedTime;
-      default: return false;
+      case 1:
+        return !!this.selectedService;
+      case 2:
+        return !!this.selectedBarber;
+      case 3:
+        return !!this.selectedDate;
+      case 4:
+        return !!this.selectedTime;
+      default:
+        return false;
     }
   }
 
@@ -137,17 +163,20 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   confirmBooking(): void {
-    const appointmentData = {
-      customerId: this.authService.getDecodedToken().id,
-      barberId: this.selectedBarber.id,
-      serviceId: this.selectedService!.id,
-      data: this.selectedDate,
-      orarioInizio: this.selectedTime
-    };
+    const decodedToken = this.authService.getDecodedToken();
+    if (decodedToken && this.selectedBarber && this.selectedService) {
+      const appointmentData = {
+        customerId: decodedToken.id,
+        barberId: this.selectedBarber.id,
+        serviceId: this.selectedService.id,
+        data: this.selectedDate,
+        orarioInizio: this.selectedTime,
+      };
 
-    console.log('Creazione appuntamento:', appointmentData);
-    // TODO: Call API POST /appointments
-    alert('Prenotazione confermata! (TODO: Implementare chiamata API)');
-    this.router.navigate(['/customer-dashboard']);
+      console.log('Creazione appuntamento:', appointmentData);
+      // TODO: Call API POST /appointments
+      alert('Prenotazione confermata! (TODO: Implementare chiamata API)');
+      this.router.navigate(['/customer-dashboard']);
+    }
   }
 }

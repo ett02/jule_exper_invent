@@ -1,6 +1,6 @@
 .booking-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #F5F5DC 0%, #E8E8D0 100%);
+  background: linear-gradient(135deg, #f5f5dc 0%, #e8e8d0 100%);
   padding: var(--spacing-lg) var(--spacing-md);
 }
 
@@ -65,8 +65,8 @@
 }
 
 .step.completed .step-number {
-  background: #4CAF50;
-  border-color: #4CAF50;
+  background: #4caf50;
+  border-color: #4caf50;
   color: var(--color-white);
 }
 
@@ -208,7 +208,7 @@
 
 .barber-card.selected {
   border-color: var(--color-primary);
-  background: linear-gradient(135deg, #FFF8F0 0%, #FFFFFF 100%);
+  background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
 }
 
 .barber-avatar {
@@ -333,8 +333,8 @@
 }
 
 .time-slot.unavailable {
-  background: #EEEEEE;
-  border: 2px solid #CCCCCC;
+  background: #eeeeee;
+  border: 2px solid #cccccc;
   color: #999999;
   cursor: not-allowed;
   opacity: 0.6;

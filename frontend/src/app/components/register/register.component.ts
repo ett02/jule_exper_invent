@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -9,27 +9,29 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [FormsModule, CommonModule, RouterLink],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+  styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   user = {
+    id: 0,
     nome: '',
     cognome: '',
     email: '',
     password: '',
-    ruolo: 'CLIENTE'
+    ruolo: 'CLIENTE',
   };
-
-  constructor(private authService: AuthService, private router: Router) { }
 
   register() {
     this.authService.register(this.user).subscribe(
       () => {
         this.router.navigate(['/login']);
       },
-      (error: any) => {
+      (error: { status: number; error: { message: string } }) => {
         console.error('Registration failed', error);
-      }
+      },
     );
   }
 }

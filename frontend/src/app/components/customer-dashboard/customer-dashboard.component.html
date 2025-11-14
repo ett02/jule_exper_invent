@@ -3,7 +3,9 @@
   <section class="hero-section">
     <div class="hero-content">
       <h1 class="welcome-title">💈 Benvenuto, {{ customerName }}!</h1>
-      <p class="welcome-subtitle">Prenota il tuo taglio perfetto con i migliori barbieri della città</p>
+      <p class="welcome-subtitle">
+        Prenota il tuo taglio perfetto con i migliori barbieri della città
+      </p>
       <button class="btn btn-primary btn-large" (click)="navigateToBooking()">
         📅 Prenota Ora
       </button>
@@ -23,11 +25,15 @@
         </div>
         <div class="appointment-details">
           <p><strong>Barbiere:</strong> {{ appointment.barberName }}</p>
-          <p><strong>Data:</strong> {{ appointment.date | date:'dd/MM/yyyy' }}</p>
+          <p><strong>Data:</strong> {{ appointment.date | date: 'dd/MM/yyyy' }}</p>
           <p><strong>Orario:</strong> {{ appointment.time }}</p>
           <p><strong>Durata:</strong> {{ appointment.duration }} min</p>
         </div>
-        <button class="btn btn-secondary btn-cancel" *ngIf="appointment.status === 'CONFIRMATO'" (click)="cancelAppointment(appointment.id)">
+        <button
+          class="btn btn-secondary btn-cancel"
+          *ngIf="appointment.status === 'CONFIRMATO'"
+          (click)="cancelAppointment(appointment.id)"
+        >
           ❌ Cancella Appuntamento
         </button>
       </div>
@@ -40,9 +46,7 @@
       <span class="empty-icon">📅</span>
       <h3>Nessun Appuntamento</h3>
       <p>Non hai ancora prenotato nessun servizio. Prenota ora per il tuo taglio perfetto!</p>
-      <button class="btn btn-primary" (click)="navigateToBooking()">
-        ✂️ Prenota Subito
-      </button>
+      <button class="btn btn-primary" (click)="navigateToBooking()">✂️ Prenota Subito</button>
     </div>
   </section>
 
@@ -56,7 +60,7 @@
           <span class="position-badge">Posizione: {{ waiting.position }}</span>
         </div>
         <p><strong>Barbiere:</strong> {{ waiting.barberName }}</p>
-        <p><strong>Data Richiesta:</strong> {{ waiting.requestedDate | date:'dd/MM/yyyy' }}</p>
+        <p><strong>Data Richiesta:</strong> {{ waiting.requestedDate | date: 'dd/MM/yyyy' }}</p>
         <p class="waiting-status">{{ waiting.statusMessage }}</p>
         <button class="btn btn-outline" (click)="removeFromWaitingList(waiting.id)">
           🗑️ Rimuovi dalla Coda

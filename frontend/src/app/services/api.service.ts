@@ -1,19 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Service } from '../models/service.model';
 import { Barber } from '../models/barber.model';
 import { Appointment } from '../models/appointment.model';
 import { Availability } from '../models/availability.model';
+import { WaitingList } from '../models/waiting-list.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
+  private http = inject(HttpClient);
 
   private apiUrl = 'http://localhost:8080';
-
-  constructor(private http: HttpClient) { }
 
   // Service management
   getAllServices(): Observable<Service[]> {
@@ -58,8 +58,8 @@ export class ApiService {
     return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/user/${userId}`);
   }
 
-  getWaitingListByCustomerId(customerId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/waiting-list/customer/${customerId}`);
+  getWaitingListByCustomerId(customerId: number): Observable<WaitingList[]> {
+    return this.http.get<WaitingList[]>(`${this.apiUrl}/waiting-list/customer/${customerId}`);
   }
 
   cancelAppointment(appointmentId: number): Observable<void> {

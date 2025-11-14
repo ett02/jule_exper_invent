@@ -1,6 +1,6 @@
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #F5F5DC 0%, #E8E8D0 100%);
+  background: linear-gradient(135deg, #f5f5dc 0%, #e8e8d0 100%);
 }
 
 /* Hero Section */
@@ -103,17 +103,17 @@
 }
 
 .badge-confirmato {
-  background: #4CAF50;
+  background: #4caf50;
   color: var(--color-white);
 }
 
 .badge-pending {
-  background: #FFA500;
+  background: #ffa500;
   color: var(--color-white);
 }
 
 .badge-annullato {
-  background: #F44336;
+  background: #f44336;
   color: var(--color-white);
 }
 
@@ -166,7 +166,7 @@
 }
 
 .waiting-card {
-  background: linear-gradient(135deg, #FFF8F0 0%, #FFFFFF 100%);
+  background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
   padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
