@@ -17,17 +17,21 @@ export class CustomerDashboardComponent implements OnInit {
   constructor(private apiService: ApiService, private router: Router) { }
 
   ngOnInit(): void {
+    console.log('CustomerDashboard: ngOnInit chiamato');
     this.apiService.getAllServices().subscribe(
       (data: Service[]) => {
+        console.log('Servizi ricevuti dal backend:', data);
         this.services = data;
+        console.log('Servizi assegnati al componente:', this.services);
       },
       (error) => {
-        console.error('Error fetching services', error);
+        console.error('Errore nel caricamento servizi:', error);
       }
     );
   }
 
   bookService(service: Service) {
+    console.log('Prenotazione servizio:', service);
     this.router.navigate(['/book'], { state: { service } });
   }
 }

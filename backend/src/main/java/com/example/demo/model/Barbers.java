@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,7 +24,8 @@ public class Barbers {
 
     private String esperienza;
 
-    private String specialità;
+    @Column(name = "specialità")  // Nome campo DB con accento
+    private String specialita;    // Property Java senza accento per Angular
 
     private Boolean isActive;
 

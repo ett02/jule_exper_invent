@@ -1,22 +1,141 @@
-<div>
-  <h2>Book {{ service?.nome }}</h2>
-  <form (ngSubmit)="bookAppointment()">
-    <div>
-      <label for="date">Select a Date</label>
-      <input type="date" id="date" [(ngModel)]="appointmentDate" name="date" required>
+<div class="booking-container">
+  <!-- Header -->
+  <div class="booking-header">
+    <h1>💈 Prenota il Tuo Servizio</h1>
+    <p class="subtitle">{{ selectedService?.nome || 'Seleziona servizio' }}</p>
+  </div>
+
+  <!-- Progress Wizard -->
+  <div class="progress-wizard">
+    <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+      <div class="step-number">1</div>
+      <div class="step-label">Servizio</div>
     </div>
-    <div>
-      <label for="barber">Select a Barber</label>
-      <select id="barber" [(ngModel)]="selectedBarber" name="barber" (change)="onBarberChange()">
-        <option *ngFor="let barber of barbers" [ngValue]="barber">{{ barber.nome }} {{ barber.cognome }}</option>
-      </select>
+    <div class="step-divider" [class.active]="currentStep > 1"></div>
+    <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+      <div class="step-number">2</div>
+      <div class="step-label">Barbiere</div>
     </div>
-    <div *ngIf="selectedBarber">
-      <label for="availability">Select a Time</label>
-      <select id="availability" [(ngModel)]="selectedAvailability" name="availability">
-        <option *ngFor="let slot of availability" [ngValue]="slot">{{ slot.giorno }} at {{ slot.orario_inizio }}</option>
-      </select>
+    <div class="step-divider" [class.active]="currentStep > 2"></div>
+    <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+      <div class="step-number">3</div>
+      <div class="step-label">Data</div>
     </div>
-    <button type="submit" [disabled]="!selectedBarber || !selectedAvailability">Confirm Booking</button>
-  </form>
+    <div class="step-divider" [class.active]="currentStep > 3"></div>
+    <div class="step" [class.active]="currentStep >= 4">
+      <div class="step-number">4</div>
+      <div class="step-label">Orario</div>
+    </div>
+  </div>
+
+  <!-- Step 1: Selezione Servizio -->
+  <div class="booking-step" *ngIf="currentStep === 1 && !selectedService">
+    <h2>Scegli il Servizio</h2>
+    <div class="services-grid">
+      <div class="service-card" *ngFor="let service of services" (click)="selectService(service)">
+        <div class="service-icon">✂️</div>
+        <h3>{{ service.nome }}</h3>
+        <p class="service-description">{{ service.descrizione }}</p>
+        <div class="service-details">
+          <span class="duration">⏱️ {{ service.durata }} min</span>
+          <span class="price">€{{ service.prezzo }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Selezione Barbiere -->
+  <div class="booking-step" *ngIf="currentStep === 2">
+    <h2>Scegli il Barbiere</h2>
+    <div class="barbers-grid">
+      <div class="barber-card" *ngFor="let barber of barbers" (click)="selectBarber(barber)" [class.selected]="selectedBarber?.id === barber.id">
+        <div class="barber-avatar">
+          <span class="avatar-icon">👨‍💼</span>
+        </div>
+        <div class="barber-info">
+          <h3>{{ barber.nome }} {{ barber.cognome }}</h3>
+          <p class="barber-experience">🎓 {{ barber.esperienza }}</p>
+          <p class="barber-specialty">✨ {{ barber.specialita }}</p>
+        </div>
+        <button class="btn btn-primary">Seleziona</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Selezione Data -->
+  <div class="booking-step" *ngIf="currentStep === 3">
+    <h2>Scegli la Data</h2>
+    <div class="calendar-container">
+      <div class="calendar-wrapper">
+        <label for="date-input" class="calendar-label">📅 Seleziona una data</label>
+        <input type="date" id="date-input" class="date-picker" [(ngModel)]="selectedDate" (change)="onDateChange()" [min]="minDate">
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Selezione Orario -->
+  <div class="booking-step" *ngIf="currentStep === 4">
+    <h2>Scegli l'Orario</h2>
+    <p class="orario-subtitle">Seleziona uno slot disponibile</p>
+    <div class="time-slots-container">
+      <div class="time-slots-grid">
+        <div class="time-slot" 
+             *ngFor="let slot of availableSlots" 
+             [class.available]="slot.available" 
+             [class.unavailable]="!slot.available"
+             [class.selected]="selectedTime === slot.time"
+             (click)="selectTimeSlot(slot)">
+          <span class="slot-time">{{ slot.time }}</span>
+          <span class="slot-status" *ngIf="!slot.available">❌</span>
+          <span class="slot-status" *ngIf="slot.available && selectedTime === slot.time">✅</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Riepilogo e Conferma -->
+  <div class="booking-summary" *ngIf="selectedService && selectedBarber && selectedDate && selectedTime">
+    <div class="summary-card">
+      <h3>📋 Riepilogo Prenotazione</h3>
+      <div class="summary-details">
+        <div class="summary-row">
+          <span class="summary-label">Servizio:</span>
+          <span class="summary-value">{{ selectedService.nome }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Barbiere:</span>
+          <span class="summary-value">{{ selectedBarber.nome }} {{ selectedBarber.cognome }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Data:</span>
+          <span class="summary-value">{{ selectedDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Orario:</span>
+          <span class="summary-value">{{ selectedTime }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Durata:</span>
+          <span class="summary-value">{{ selectedService.durata }} minuti</span>
+        </div>
+        <div class="summary-row total">
+          <span class="summary-label">Totale:</span>
+          <span class="summary-value price">€{{ selectedService.prezzo }}</span>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-confirm" (click)="confirmBooking()">
+        ✅ Conferma Prenotazione
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="navigation-buttons">
+    <button class="btn btn-secondary" *ngIf="currentStep > 1" (click)="previousStep()">
+      ← Indietro
+    </button>
+    <button class="btn btn-primary" *ngIf="currentStep < 4 && canProceed()" (click)="nextStep()">
+      Avanti →
+    </button>
+  </div>
 </div>
