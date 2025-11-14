@@ -34,7 +34,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/services/**", "/shop-hours/**", "/barbers/**", "/appointments/available-slots/**").permitAll()
+                // API Pubbliche (per registrazione e prenotazione)
+                .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                .requestMatchers(HttpMethod.GET, "/services", "/services/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/barbers", "/barbers/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/shop-hours", "/shop-hours/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/appointments/available-slots").permitAll()
+                
+                // Tutto il resto richiede autenticazione
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

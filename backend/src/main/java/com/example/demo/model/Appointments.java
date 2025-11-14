@@ -36,6 +36,8 @@ public class Appointments {
     public enum StatoAppuntamento {
         CONFIRMATO,
         PENDING,
-        ANNULLATO
+        ANNULLATO,
+        IN_CORSO,
+        COMPLETATO
     }
 }

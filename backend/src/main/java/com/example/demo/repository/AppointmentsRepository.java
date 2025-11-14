@@ -15,4 +15,6 @@ public interface AppointmentsRepository extends JpaRepository<Appointments, Long
     List<Appointments> findByBarberId(Long barberId);
 
     List<Appointments> findByBarberIdAndData(Long barberId, LocalDate data);
+
+    List<Appointments> findByDataOrderByOrarioInizioAsc(LocalDate data);
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/appointments")
@@ -61,6 +62,18 @@ public class AppointmentsController {
         return ResponseEntity.ok(appointmentsService.updateAppointment(id, request));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Appointments> updateStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        String newStatus = body.get("status");
+        if (newStatus == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(appointmentsService.updateAppointmentStatus(id, newStatus));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelAppointment(@PathVariable Long id) {
         appointmentsService.cancelAppointment(id);
@@ -80,6 +93,18 @@ public class AppointmentsController {
         System.out.println("Slot trovati: " + slots.size());
         
         return ResponseEntity.ok(slots);
+    }
+
+    @GetMapping("/by-date")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<AppointmentResponse>> getAppointmentsByDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        
+        List<Appointments> appointments = appointmentsService.getAppointmentsByDate(date);
+        List<AppointmentResponse> response = appointments.stream()
+            .map(this::convertToResponse) // Usiamo il metodo esistente
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
