@@ -29,6 +29,12 @@ export class ServiceBookingComponent implements OnInit {
   
   minDate: string = '';
 
+  currentMonth: Date = new Date();
+  currentMonthDisplay: string = '';
+  weekDays: string[] = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+  calendarDays: any[] = [];
+  shopSettings: any[] = [];
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
@@ -49,6 +55,9 @@ export class ServiceBookingComponent implements OnInit {
     } else {
       this.loadServices();
     }
+
+    this.loadShopSettings();
+    this.generateCalendar();
   }
 
   loadServices(): void {
@@ -89,6 +98,68 @@ export class ServiceBookingComponent implements OnInit {
         { time: '14:30', available: true },
         { time: '15:00', available: true }
       ];
+    }
+  }
+
+  loadShopSettings(): void {
+    // TODO: Call API GET /shop-settings
+    // Mock data for now
+    this.shopSettings = [
+      { giorno: 1, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Lunedì
+      { giorno: 2, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Martedì
+      { giorno: 3, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Mercoledì
+      { giorno: 4, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Giovedì
+      { giorno: 5, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Venerdì
+      { giorno: 6, orarioApertura: '09:00', orarioChiusura: '17:00', isAperto: true },  // Sabato
+      { giorno: 0, isAperto: false }  // Domenica chiuso
+    ];
+  }
+
+  generateCalendar(): void {
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    
+    // Set current month display
+    this.currentMonthDisplay = this.currentMonth.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+    
+    // First day of month
+    const firstDay = new Date(year, month, 1);
+    const firstDayOfWeek = firstDay.getDay();
+    
+    // Last day of month
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    this.calendarDays = [];
+    
+    // Add empty cells before first day
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      this.calendarDays.push({ isEmpty: true });
+    }
+    
+    // Add days of month
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay();
+      const shopSetting = this.shopSettings.find(s => s.giorno === dayOfWeek);
+      
+      const isPast = date < today;
+      const isOpen = shopSetting?.isAperto || false;
+      const isToday = date.getTime() === today.getTime();
+      
+      this.calendarDays.push({
+        number: day,
+        date: date,
+        dayOfWeek: dayOfWeek,
+        available: !isPast && isOpen,
+        unavailable: isPast || !isOpen,
+        isToday: isToday,
+        selected: false,
+        isEmpty: false
+      });
     }
   }
 
@@ -153,5 +224,32 @@ export class ServiceBookingComponent implements OnInit {
 
   goBackToDashboard(): void {
     this.router.navigate(['/customer-dashboard']);
+  }
+
+  selectDate(day: any): void {
+    if (day.isEmpty || day.unavailable) {
+      return;
+    }
+    
+    // Deselect all days
+    this.calendarDays.forEach(d => d.selected = false);
+    
+    // Select this day
+    day.selected = true;
+    this.selectedDate = day.date.toISOString().split('T')[0];
+    
+    console.log('Data selezionata:', this.selectedDate);
+    this.loadAvailableSlots();
+    this.nextStep();
+  }
+
+  previousMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+    this.generateCalendar();
+  }
+
+  nextMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+    this.generateCalendar();
   }
 }
