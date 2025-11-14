@@ -1012,15 +1012,52 @@ Ruolo: CLIENTE
 
 ---
 
-**📅 Ultimo Aggiornamento**: 14 Novembre 2025, 01:30 AM  
+**📅 Ultimo Aggiornamento**: 14 Novembre 2025, 01:40 AM  
 **👨‍💻 Sviluppatore**: Ettore  
-**🚀 Prossimo Obiettivo**: Completare stilizzazione componenti + implementare ServiceBookingComponent  
+**🚀 Prossimo Obiettivo**: Risolvere crash backend + Testare applicazione completa  
 **⏱️ Tempo Stimato Completamento FASE 2**: 8-12 ore
 
 ---
 
-**📝 Sessione Corrente**: 
+## **🔴 PROBLEMA ATTUALE (15 NOVEMBRE 2025 - 01:40 AM):**
+
+### **Backend CRASH all'avvio - Exit Code 1**
+
+**Errore**: `Process terminated with exit code: 1`
+
+**File Creati Oggi**:
+- ✅ `JwtRequestFilter.java` - Creato nella cartella `filter/`
+- ✅ `SecurityConfig.java` - Aggiornato con metodo `corsConfigurationSource()`
+- ✅ CSS globale con design system
+- ✅ LoginComponent e CustomerDashboardComponent stilizzati
+- ✅ Database popolato con 8 servizi, 3 barbieri, 2 utenti test
+
+**Prossimi Passi per Debug**:
+1. Eseguire: `.\mvnw.cmd spring-boot:run 2>&1 | Select-String -Pattern "Error|Exception|Caused" | Select-Object -First 30`
+2. Identificare il file mancante o l'errore di configurazione
+3. Correggere l'errore
+4. Riavviare backend
+5. Testare login e visualizzazione servizi
+
+**Dati di Test Pronti**:
+- Admin: `admin@barbershop.com` / `admin123`
+- Cliente: `prova@gmail.com` / `prova`
+- 8 servizi (€15-€50)
+- 3 barbieri con disponibilità configurate
+
+---
+
+**📝 Sessione 14 Novembre 2025 (01:00 AM - 01:40 AM)**: 
 - ✅ Creato CSS globale con design system completo
 - ✅ Stilizzato LoginComponent con animazioni
 - ✅ Stilizzato CustomerDashboardComponent con grid responsive
-- ⏳ PROSSIMA SESSIONE: Implementare ServiceBookingComponent wizard + AppointmentListComponent
+- ✅ Popolato database con dati di test
+- ✅ Aggiornato SecurityConfig.java per permettere accesso pubblico a `/services`
+- ✅ Creato JwtRequestFilter.java
+- 🔴 **PROBLEMA**: Backend crash con exit code 1 (da debuggare nella prossima sessione)
+
+**⏳ PROSSIMA SESSIONE (15 NOVEMBRE 2025)**: 
+- Debug e risoluzione crash backend
+- Testare login e visualizzazione servizi
+- Implementare ServiceBookingComponent wizard
+- Implementare AppointmentListComponent

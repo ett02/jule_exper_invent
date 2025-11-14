@@ -18,17 +18,6 @@
   --color-black: #000000;
   --color-border: #E0E0E0;
   
-  /* Colori Stato */
-  --color-success: #4CAF50;
-  --color-error: #F44336;
-  --color-warning: #FF9800;
-  --color-info: #2196F3;
-  
-  /* Dark Mode Colors */
-  --color-dark-bg: #1A1A1A;
-  --color-dark-card: #2D2D2D;
-  --color-dark-text: #E0E0E0;
-  
   /* Typography */
   --font-heading: 'Montserrat', sans-serif;
   --font-body: 'Poppins', sans-serif;
