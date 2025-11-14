@@ -122,25 +122,14 @@
     <h2>Scegli l'Orario</h2>
     <p class="orario-subtitle">Seleziona uno slot disponibile</p>
     
-    <!-- DEBUG: Mostra stato caricamento -->
-    <div class="debug-info" style="text-align: center; margin-bottom: 1rem;">
-      <p *ngIf="availableSlots.length === 0" style="color: red; font-weight: bold;">
-        ⚠️ Nessuno slot caricato! Verifica la console (F12).
-      </p>
-      <p *ngIf="availableSlots.length > 0" style="color: green; font-weight: bold;">
-        ✅ {{ availableSlots.length }} slot caricati
-      </p>
-    </div>
-    
     <div class="time-slots-container">
       <div class="time-slots-grid">
         <div class="time-slot" 
-             *ngFor="let slot of availableSlots; let i = index" 
+             *ngFor="let slot of availableSlots" 
              [class.available]="slot.available" 
              [class.unavailable]="!slot.available"
              [class.selected]="selectedTime === slot.time"
-             (click)="selectTimeSlot(slot)"
-             [attr.data-index]="i">
+             (click)="selectTimeSlot(slot)">
           <span class="slot-time">{{ slot.time }}</span>
           <span class="slot-status" *ngIf="!slot.available">❌</span>
           <span class="slot-status" *ngIf="slot.available && selectedTime === slot.time">✅</span>

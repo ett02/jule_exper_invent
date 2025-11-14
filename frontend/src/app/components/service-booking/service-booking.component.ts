@@ -101,18 +101,35 @@ export class ServiceBookingComponent implements OnInit {
         (slots) => {
           console.log('✅ Slot ricevuti dal backend:', slots);
           this.availableSlots = slots.map((slot: any) => ({
-            time: slot.orarioInizio,
+            time: this.formatTime(slot.orarioInizio || slot.time),
             available: slot.disponibile !== false
           }));
-          console.log('📋 Slot processati (ogni 30 min):', this.availableSlots);
+          console.log('📋 Slot processati:', this.availableSlots);
         },
         (error) => {
           console.error('❌ Errore caricamento slot dal backend:', error);
-          console.log('🔄 Uso slot mock di fallback (ogni 30 min)');
+          console.log('🔄 Uso slot mock di fallback');
           this.availableSlots = this.generateMockSlots();
         }
       );
     }
+  }
+
+  // Formatta l'orario rimuovendo i secondi
+  formatTime(time: string): string {
+    if (!time) return '';
+    
+    // Se è già nel formato HH:mm, restituiscilo
+    if (time.length === 5 && time.includes(':')) {
+      return time;
+    }
+    
+    // Se è nel formato HH:mm:ss, rimuovi i secondi
+    if (time.length === 8 && time.split(':').length === 3) {
+      return time.substring(0, 5);
+    }
+    
+    return time;
   }
 
   // Genera slot mock per test - OGNI 30 MINUTI dalle 08:00 alle 20:00
