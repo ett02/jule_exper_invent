@@ -71,4 +71,17 @@ public class ServicesService {
     public void deleteService(@NonNull Long id) {
         servicesRepository.deleteById(id);
     }
+
+    public Services updateService(@NonNull Long id, @NonNull Services serviceDetails) {
+        Services existingService = servicesRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Servizio non trovato con id: " + id));
+
+        existingService.setNome(serviceDetails.getNome());
+        existingService.setDurata(serviceDetails.getDurata());
+        existingService.setPrezzo(serviceDetails.getPrezzo());
+        existingService.setDescrizione(serviceDetails.getDescrizione());
+
+        return servicesRepository.save(existingService);
+    }
+
 }
