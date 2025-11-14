@@ -38,7 +38,11 @@ public class ShopHoursService {
             shopHours.setIsChiuso(isChiuso);
         } else {
             // Crea nuovo
-            shopHours = new ShopHours(giorno, orarioApertura, orarioChiusura, isChiuso);
+            shopHours = new ShopHours();
+            shopHours.setGiorno(giorno);
+            shopHours.setOrarioApertura(orarioApertura);
+            shopHours.setOrarioChiusura(orarioChiusura);
+            shopHours.setIsChiuso(isChiuso);
         }
 
         return shopHoursRepository.save(shopHours);

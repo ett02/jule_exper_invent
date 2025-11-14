@@ -85,18 +85,16 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadShopHours(): void {
-    // TODO: Implementare API GET /shop-hours
     this.http.get<ShopHours[]>('http://localhost:8080/shop-hours').subscribe(
       (data) => {
-        console.log('Orari salone ricevuti:', data);
-        // Associa orari ai giorni
+        console.log('✅ Orari salone ricevuti:', data);
         this.weekDays.forEach(day => {
           const hours = data.find(h => h.giorno === day.value);
           day.hours = hours || null;
         });
       },
       (error) => {
-        console.error('Errore caricamento orari:', error);
+        console.error('❌ Errore caricamento orari:', error);
       }
     );
   }

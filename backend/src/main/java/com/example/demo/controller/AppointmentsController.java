@@ -49,9 +49,8 @@ public class AppointmentsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Appointments> getAppointmentById(@PathVariable Long id) {
-        return appointmentsService.getAppointmentById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Appointments appointment = appointmentsService.getAppointmentById(id);
+        return ResponseEntity.ok(appointment);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

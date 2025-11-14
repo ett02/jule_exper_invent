@@ -21,16 +21,6 @@ public class ShopHours {
     @Column(name = "orario_chiusura")
     private LocalTime orarioChiusura;
 
-    private Boolean isChiuso; // true se il salone è chiuso quel giorno
-
-    // Costruttore vuoto richiesto da JPA
-    public ShopHours() {}
-
-    // Costruttore con parametri
-    public ShopHours(Integer giorno, LocalTime orarioApertura, LocalTime orarioChiusura, Boolean isChiuso) {
-        this.giorno = giorno;
-        this.orarioApertura = orarioApertura;
-        this.orarioChiusura = orarioChiusura;
-        this.isChiuso = isChiuso;
-    }
+    @Column(name = "is_chiuso")
+    private Boolean isChiuso;
 }

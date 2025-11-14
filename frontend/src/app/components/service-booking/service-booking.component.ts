@@ -1,14 +1,41 @@
 import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { AppointmentService } from '../../services/appointment.service';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Service } from '../../models/service.model';
-import { Barber } from '../../models/barber.model';
-import { Availability } from '../../models/availability.model';
-import { Appointment } from '../../models/appointment.model';
+
+// Interfacce per chiarezza
+interface Barber {
+  id: number;
+  nome: string;
+  cognome: string;
+  esperienza: string;
+  specialita: string;
+}
+
+interface Service {
+  id: number;
+  nome: string;
+  durata: number;
+  prezzo: number;
+  descrizione: string;
+}
+
+// --- (Aggiunta 1) ---
+// Interfaccia per i giorni del calendario
+interface CalendarDay {
+  day: number | null; // null per i giorni vuoti all'inizio/fine mese
+  isToday: boolean;
+}
+
+// --- (Aggiunta 2) ---
+// Interfaccia per gli slot come atteso dall'HTML
+interface TimeSlot {
+  time: string;       // Era 'orario'
+  available: boolean; // Era 'disponibile'
+}
 
 @Component({
   selector: 'app-service-booking',
@@ -19,200 +46,62 @@ import { Appointment } from '../../models/appointment.model';
 })
 export class ServiceBookingComponent implements OnInit {
   currentStep: number = 1;
-  services: Service[] = [];
-  barbers: any[] = [];
-  availableSlots: any[] = [];
-  
   selectedService: Service | null = null;
-  selectedBarber: any = null;
-  selectedDate: string = '';
-  selectedTime: string = '';
+  selectedBarber: Barber | null = null;
+  selectedDate: string | null = null;
   
-  minDate: string = '';
+  // --- (Correzione 1) ---
+  // Rinominato da 'selectedTimeSlot' a 'selectedTime'
+  // e tipo aggiornato a TimeSlot
+  selectedTime: TimeSlot | null = null;
+
+  services: Service[] = [];
+  barbers: Barber[] = [];
+
+  // --- (Correzione 2) ---
+  // Tipo aggiornato per usare TimeSlot
+  availableSlots: TimeSlot[] = [];
 
   currentMonth: Date = new Date();
+
+  // --- (Correzione 3) ---
+  // Proprietà aggiunte per il calendario HTML
   currentMonthDisplay: string = '';
   weekDays: string[] = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
-  calendarDays: any[] = [];
-  shopSettings: any[] = [];
+  calendarDays: CalendarDay[] = []; // Sostituisce 'monthDays'
 
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
     private appointmentService: AppointmentService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    // Set minimum date to today
-    const today = new Date();
-    this.minDate = today.toISOString().split('T')[0];
-    
-    // Check if service was passed from customer dashboard
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras.state?.['service']) {
-      this.selectedService = navigation.extras.state['service'];
-      this.currentStep = 2;
-      this.loadBarbers();
-    } else {
-      this.loadServices();
-    }
+    // --- (Correzione 4) ---
+    // Chiamiamo la nuova funzione per costruire il calendario
+    this.buildCalendar();
 
-    this.loadShopSettings();
-    this.generateCalendar();
-  }
-
-  loadServices(): void {
+    // Logica di caricamento servizi (corretta nella versione precedente)
     this.apiService.getAllServices().subscribe(
       (data) => {
         this.services = data;
+        this.route.queryParams.subscribe(params => {
+          if (params['serviceId']) {
+            const serviceId = +params['serviceId'];
+            this.selectedService = this.services.find(s => s.id === serviceId) || null;
+            if (this.selectedService) {
+              this.currentStep = 2;
+              this.loadBarbers();
+            }
+          }
+        });
       },
       (error) => {
-        console.error('Error loading services:', error);
+        console.error('Errore caricamento servizi:', error);
       }
     );
-  }
-
-  loadBarbers(): void {
-    if (this.selectedService) {
-      // TODO: Call API GET /barbers/service/{serviceId}
-      // Mock data for now
-      this.barbers = [
-        { id: 1, nome: 'Marco', cognome: 'Bianchi', esperienza: '8 anni', specialita: 'Tagli classici e moderni' },
-        { id: 2, nome: 'Luca', cognome: 'Verdi', esperienza: '5 anni', specialita: 'Specialista barba' },
-        { id: 3, nome: 'Giuseppe', cognome: 'Neri', esperienza: '10 anni', specialita: 'Tagli moderni e sfumature' }
-      ];
-    }
-  }
-
-  loadAvailableSlots(): void {
-    if (this.selectedBarber && this.selectedService && this.selectedDate) {
-      console.log('🔍 Caricamento slot per:', {
-        barberId: this.selectedBarber.id,
-        serviceId: this.selectedService.id,
-        date: this.selectedDate
-      });
-
-      this.appointmentService.getAvailableSlots(
-        this.selectedBarber.id,
-        this.selectedService.id,
-        this.selectedDate
-      ).subscribe(
-        (slots) => {
-          console.log('✅ Slot ricevuti dal backend:', slots);
-          this.availableSlots = slots.map((slot: any) => ({
-            time: this.formatTime(slot.orarioInizio || slot.time),
-            available: slot.disponibile !== false
-          }));
-          console.log('📋 Slot processati:', this.availableSlots);
-        },
-        (error) => {
-          console.error('❌ Errore caricamento slot dal backend:', error);
-          console.log('🔄 Uso slot mock di fallback');
-          this.availableSlots = this.generateMockSlots();
-        }
-      );
-    }
-  }
-
-  // Formatta l'orario rimuovendo i secondi
-  formatTime(time: string): string {
-    if (!time) return '';
-    
-    // Se è già nel formato HH:mm, restituiscilo
-    if (time.length === 5 && time.includes(':')) {
-      return time;
-    }
-    
-    // Se è nel formato HH:mm:ss, rimuovi i secondi
-    if (time.length === 8 && time.split(':').length === 3) {
-      return time.substring(0, 5);
-    }
-    
-    return time;
-  }
-
-  // Genera slot mock per test - OGNI 30 MINUTI dalle 08:00 alle 20:00
-  generateMockSlots(): any[] {
-    const slots = [];
-    const startHour = 8;   // 08:00
-    const endHour = 20;    // 20:00
-    const interval = 30;   // 30 minuti
-
-    for (let hour = startHour; hour < endHour; hour++) {
-      // Per ogni ora, genera 2 slot (00 e 30 minuti)
-      for (let minute = 0; minute < 60; minute += interval) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        const available = Math.random() > 0.3; // 70% disponibili
-        slots.push({ time, available });
-      }
-    }
-
-    console.log('🎲 Generati', slots.length, 'slot da 30 minuti (08:00-19:30)');
-    console.log('📋 Slot generati:', slots.map(s => s.time).join(', '));
-    return slots;
-  }
-
-  loadShopSettings(): void {
-    // TODO: Call API GET /shop-settings
-    // Mock data for now
-    this.shopSettings = [
-      { giorno: 1, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Lunedì
-      { giorno: 2, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Martedì
-      { giorno: 3, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Mercoledì
-      { giorno: 4, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Giovedì
-      { giorno: 5, orarioApertura: '09:00', orarioChiusura: '19:00', isAperto: true },  // Venerdì
-      { giorno: 6, orarioApertura: '09:00', orarioChiusura: '17:00', isAperto: true },  // Sabato
-      { giorno: 0, isAperto: false }  // Domenica chiuso
-    ];
-  }
-
-  generateCalendar(): void {
-    const year = this.currentMonth.getFullYear();
-    const month = this.currentMonth.getMonth();
-    
-    // Set current month display
-    this.currentMonthDisplay = this.currentMonth.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
-    
-    // First day of month
-    const firstDay = new Date(year, month, 1);
-    const firstDayOfWeek = firstDay.getDay();
-    
-    // Last day of month
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    
-    this.calendarDays = [];
-    
-    // Add empty cells before first day
-    for (let i = 0; i < firstDayOfWeek; i++) {
-      this.calendarDays.push({ isEmpty: true });
-    }
-    
-    // Add days of month
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dayOfWeek = date.getDay();
-      const shopSetting = this.shopSettings.find(s => s.giorno === dayOfWeek);
-      
-      const isPast = date < today;
-      const isOpen = shopSetting?.isAperto || false;
-      const isToday = date.getTime() === today.getTime();
-      
-      this.calendarDays.push({
-        number: day,
-        date: date,
-        dayOfWeek: dayOfWeek,
-        available: !isPast && isOpen,
-        unavailable: isPast || !isOpen,
-        isToday: isToday,
-        selected: false,
-        isEmpty: false
-      });
-    }
   }
 
   selectService(service: Service): void {
@@ -221,43 +110,126 @@ export class ServiceBookingComponent implements OnInit {
     this.loadBarbers();
   }
 
-  selectBarber(barber: any): void {
+  loadBarbers(): void {
+    if (!this.selectedService) return;
+    // TODO: Sostituire con chiamata API
+    this.barbers = [
+      { id: 1, nome: 'Marco', cognome: 'Bianchi', esperienza: '10 anni', specialita: 'Taglio classico' },
+      { id: 2, nome: 'Luca', cognome: 'Verdi', esperienza: '5 anni', specialita: 'Barba' }
+    ];
+  }
+
+  selectBarber(barber: Barber): void {
     this.selectedBarber = barber;
     this.nextStep();
   }
 
-  onDateChange(): void {
-    console.log('📅 Data cambiata:', this.selectedDate);
-    if (this.selectedDate) {
-      this.loadAvailableSlots();
-      // Non auto-avanzare, lascia vedere gli slot
+  // --- (Correzione 5) ---
+  // 'buildMonthDays' rinominato e completamente riscritto
+  // per popolare 'calendarDays' e 'currentMonthDisplay'
+  buildCalendar(): void {
+    const y = this.currentMonth.getFullYear();
+    const m = this.currentMonth.getMonth();
+    
+    // Per 'currentMonthDisplay' (es. "Novembre 2025")
+    this.currentMonthDisplay = this.currentMonth.toLocaleDateString('it-IT', {
+      month: 'long',
+      year: 'numeric'
+    });
+
+    this.calendarDays = [];
+    const firstDayOfMonth = new Date(y, m, 1).getDay(); // 0=Dom, 1=Lun,...
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const today = new Date();
+
+    // 1. Aggiungi celle vuote per i giorni prima dell'inizio del mese
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      this.calendarDays.push({ day: null, isToday: false });
+    }
+
+    // 2. Aggiungi i giorni del mese
+    for (let i = 1; i <= daysInMonth; i++) {
+      const isToday = y === today.getFullYear() && m === today.getMonth() && i === today.getDate();
+      this.calendarDays.push({ day: i, isToday: isToday });
     }
   }
 
-  selectTimeSlot(slot: any): void {
-    if (!slot.available) {
-      console.log('❌ Slot non disponibile:', slot.time);
+  previousMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+    this.buildCalendar(); // Aggiorna il calendario
+  }
+
+  nextMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+    this.buildCalendar(); // Aggiorna il calendario
+  }
+
+  // --- (Correzione 6) ---
+  // 'selectDate' ora accetta un oggetto 'CalendarDay'
+  selectDate(dayObj: CalendarDay): void {
+    // Non fare nulla se si clicca su una cella vuota
+    if (dayObj.day === null) {
       return;
     }
+
+    const y = this.currentMonth.getFullYear();
+    const m = this.currentMonth.getMonth() + 1;
+    const dd = String(dayObj.day).padStart(2, '0');
+    const mm = String(m).padStart(2, '0');
+    this.selectedDate = `${y}-${mm}-${dd}`;
     
-    console.log('✅ Slot selezionato:', slot.time);
-    this.selectedTime = slot.time;
+    this.loadAvailableSlots();
+    // nextStep() viene chiamato dentro loadAvailableSlots() in caso di successo
   }
 
-  canProceed(): boolean {
-    switch (this.currentStep) {
-      case 1: return !!this.selectedService;
-      case 2: return !!this.selectedBarber;
-      case 3: return !!this.selectedDate;
-      case 4: return !!this.selectedTime;
-      default: return false;
+  loadAvailableSlots(): void {
+    if (!this.selectedBarber || !this.selectedService || !this.selectedDate) {
+      console.error('Dati mancanti per caricare gli slot');
+      return;
     }
+    const { id: barberId } = this.selectedBarber;
+    const { id: serviceId } = this.selectedService;
+    const date = this.selectedDate;
+
+    this.appointmentService.getAvailableSlots(barberId, serviceId, date).subscribe(
+      (slots: any[]) => {
+        console.log('Slot ricevuti dal backend:', slots);
+        
+        // --- (Correzione 7) ---
+        // Mappiamo la risposta del backend ({orario, disponibile})
+        // nel formato atteso dall'HTML ({time, available})
+        this.availableSlots = slots.map(slot => {
+          return {
+            time: slot.orario,
+            available: slot.disponibile
+          };
+        });
+        
+        const availableCount = this.availableSlots.filter(s => s.available).length;
+        console.log(`Disponibili: ${availableCount}, Occupati: ${this.availableSlots.length - availableCount}`);
+
+        this.nextStep(); // Vai allo step 4 (orari)
+      },
+      (error: any) => {
+        console.error('Errore caricamento slot:', error);
+        this.availableSlots = [];
+        alert('Errore nel caricamento degli orari disponibili');
+      }
+    );
   }
 
-  nextStep(): void {
-    if (this.currentStep < 4) {
-      this.currentStep++;
+  // --- (Correzione 8) ---
+  // Rinominato da 'selectTimeSlot' a 'selectTime' e tipo aggiornato
+  selectTime(slot: TimeSlot): void {
+    if (!slot.available) {
+      console.warn('Tentativo di selezionare slot occupato:', slot);
+      alert('Questo orario è già occupato. Seleziona un altro slot.');
+      return;
     }
+
+    console.log('Slot selezionato:', slot);
+    this.selectedTime = slot; // Era selectedTimeSlot
+    this.nextStep();
   }
 
   previousStep(): void {
@@ -266,32 +238,55 @@ export class ServiceBookingComponent implements OnInit {
     }
   }
 
+  nextStep(): void {
+    this.currentStep++;
+  }
+
   confirmBooking(): void {
+    // --- (Correzione 9) ---
+    // Check aggiornato per usare 'selectedTime'
+    if (!this.selectedBarber || !this.selectedService || !this.selectedDate || !this.selectedTime) {
+      alert('Completa tutti i campi prima di confermare');
+      return;
+    }
+
+    const token = this.authService.getDecodedToken();
+    if (!token || !token.id) {
+      alert('Errore autenticazione. Effettua nuovamente il login.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     const appointmentData = {
-      customerId: this.authService.getDecodedToken().id,
+      customerId: token.id,
       barberId: this.selectedBarber.id,
-      serviceId: this.selectedService!.id,
+      serviceId: this.selectedService.id,
       data: this.selectedDate,
-      orarioInizio: this.selectedTime
+      // Usiamo la proprietà 'time' dal nostro oggetto 'selectedTime'
+      orarioInizio: this.ensureHHmmss(this.selectedTime.time)
     };
 
     console.log('Creazione appuntamento:', appointmentData);
-    
+
     this.appointmentService.createAppointment(appointmentData).subscribe(
-      (response) => {
+      (response: any) => {
         console.log('Prenotazione confermata:', response);
-        alert('✅ Prenotazione confermata con successo!\n\n' +
-              `Servizio: ${this.selectedService!.nome}\n` +
-              `Barbiere: ${this.selectedBarber.nome} ${this.selectedBarber.cognome}\n` +
-              `Data: ${new Date(this.selectedDate).toLocaleDateString('it-IT')}\n` +
-              `Orario: ${this.selectedTime}\n` +
-              `Durata: ${this.selectedService!.durata} minuti\n` +
-              `Prezzo: €${this.selectedService!.prezzo}`);
+        
+        alert(
+          `✅ Prenotazione confermata!\n\n` +
+          `Servizio: ${this.selectedService!.nome}\n` +
+          `Barbiere: ${this.selectedBarber!.nome} ${this.selectedBarber!.cognome}\n` +
+          `Data: ${new Date(this.selectedDate!).toLocaleDateString('it-IT')}\n` +
+          `Orario: ${this.selectedTime!.time}\n` + // Usiamo .time
+          `Durata: ${this.selectedService!.durata} minuti\n` +
+          `Prezzo: €${this.selectedService!.prezzo}`
+        );
+        
         this.router.navigate(['/customer-dashboard']);
       },
-      (error) => {
-        console.error('Errore durante la prenotazione:', error);
-        alert('❌ Errore durante la prenotazione: ' + (error.error?.message || 'Riprova più tardi'));
+      (error: any) => {
+        console.error('Errore prenotazione:', error);
+        alert('Errore durante la prenotazione: ' + (error.error?.message || 'Riprova più tardi'));
       }
     );
   }
@@ -300,30 +295,34 @@ export class ServiceBookingComponent implements OnInit {
     this.router.navigate(['/customer-dashboard']);
   }
 
-  selectDate(day: any): void {
-    if (day.isEmpty || day.unavailable) {
-      return;
+  private ensureHHmmss(time: string): string {
+    if (/^\d{2}:\d{2}$/.test(time)) return `${time}:00`;
+    if (/^\d{2}:\d{2}:\d{2}$/.test(time)) return time;
+    
+    const match = time.match(/^(\d{2}:\d{2})/);
+    if (match) {
+      console.warn(`Formato ora non standard: ${time}. Convertito in ${match[1]}:00`);
+      return `${match[1]}:00`;
     }
     
-    // Deselect all days
-    this.calendarDays.forEach(d => d.selected = false);
-    
-    // Select this day
-    day.selected = true;
-    this.selectedDate = day.date.toISOString().split('T')[0];
-    
-    console.log('✅ Data selezionata dal calendario:', this.selectedDate);
-    this.loadAvailableSlots();
-    this.nextStep();
+    console.error(`Formato ora non valido: ${time}. Uso 00:00:00`);
+    return '00:00:00';
   }
 
-  previousMonth(): void {
-    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
-    this.generateCalendar();
-  }
-
-  nextMonth(): void {
-    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
-    this.generateCalendar();
+  // --- (Correzione 10) ---
+  // Aggiunta la funzione 'canProceed' mancante, usata nell'HTML
+  canProceed(): boolean {
+    switch (this.currentStep) {
+      case 1:
+        return this.selectedService !== null;
+      case 2:
+        return this.selectedBarber !== null;
+      case 3:
+        return this.selectedDate !== null;
+      case 4:
+        return this.selectedTime !== null;
+      default:
+        return false;
+    }
   }
 }

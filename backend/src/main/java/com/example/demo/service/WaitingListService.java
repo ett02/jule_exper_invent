@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +28,9 @@ public class WaitingListService {
 
     @Autowired
     private ServicesRepository servicesRepository;
+
+    @Autowired
+    private AppointmentsRepository appointmentsRepository;
 
     @Autowired
     private AppointmentsService appointmentsService;
@@ -60,40 +65,44 @@ public class WaitingListService {
     }
 
     @Transactional
-    public void processWaitingListForCancelledAppointment(Appointments cancelledAppointment) {
-        // Trova il primo in lista d'attesa per quel barbiere, servizio e data
+    public void processWaitingListForCancelledAppointment(Long barberId, Long serviceId, LocalDate date) {
+        // Trova il primo in coda per questo barbiere/servizio/data
         Optional<WaitingList> firstInQueue = waitingListRepository
                 .findFirstByBarberIdAndServiceIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
-                        cancelledAppointment.getBarber().getId(),
-                        cancelledAppointment.getService().getId(),
-                        cancelledAppointment.getData(),
-                        WaitingList.StatoListaAttesa.IN_ATTESA
+                        barberId, serviceId, date, WaitingList.StatoListaAttesa.IN_ATTESA
                 );
 
         if (firstInQueue.isPresent()) {
-            WaitingList waitingEntry = firstInQueue.get();
-
-            // Crea automaticamente l'appuntamento per il primo in coda
-            AppointmentRequest appointmentRequest = new AppointmentRequest();
-            appointmentRequest.setCustomerId(waitingEntry.getCustomer().getId());
-            appointmentRequest.setBarberId(waitingEntry.getBarber().getId());
-            appointmentRequest.setServiceId(waitingEntry.getService().getId());
-            appointmentRequest.setData(cancelledAppointment.getData());
-            appointmentRequest.setOrarioInizio(cancelledAppointment.getOrarioInizio());
-
-            try {
-                appointmentsService.createAppointment(appointmentRequest);
-
-                // Aggiorna lo stato nella lista d'attesa
-                waitingEntry.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
-                waitingListRepository.save(waitingEntry);
-
-                // TODO: Invia notifica al cliente (implementata in STEP 4)
-                System.out.println("Slot assegnato a: " + waitingEntry.getCustomer().getEmail());
-
-            } catch (Exception e) {
-                System.err.println("Errore nell'assegnazione automatica dello slot: " + e.getMessage());
-            }
+            WaitingList waiting = firstInQueue.get();
+            
+            // Crea appuntamento automatico per il primo in coda
+            Appointments newAppointment = new Appointments();
+            
+            com.example.demo.model.Users customer = new com.example.demo.model.Users();
+            customer.setId(waiting.getCustomer().getId());
+            newAppointment.setCustomer(customer);
+            
+            com.example.demo.model.Barbers barber = new com.example.demo.model.Barbers();
+            barber.setId(barberId);
+            newAppointment.setBarber(barber);
+            
+            Services service = new Services();
+            service.setId(serviceId);
+            newAppointment.setService(service);
+            
+            newAppointment.setData(date);
+            newAppointment.setOrarioInizio(waiting.getOrarioRichiesto() != null ? waiting.getOrarioRichiesto() : LocalTime.of(9, 0));
+            newAppointment.setStato(Appointments.StatoAppuntamento.CONFIRMATO);
+            
+            appointmentsRepository.save(newAppointment);
+            
+            // Aggiorna stato lista d'attesa
+            waiting.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
+            waitingListRepository.save(waiting);
+            
+            System.out.println("✅ Slot assegnato automaticamente a: " + waiting.getCustomer().getEmail());
+        } else {
+            System.out.println("ℹ️ Nessuno in lista d'attesa per questo slot");
         }
     }
 
