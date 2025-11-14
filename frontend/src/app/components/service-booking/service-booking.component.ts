@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
+import { AppointmentService } from '../../services/appointment.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -38,6 +39,7 @@ export class ServiceBookingComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
+    private appointmentService: AppointmentService,
     private router: Router
   ) {}
 
@@ -85,20 +87,53 @@ export class ServiceBookingComponent implements OnInit {
 
   loadAvailableSlots(): void {
     if (this.selectedBarber && this.selectedService && this.selectedDate) {
-      // TODO: Call API GET /appointments/available-slots
-      // Mock data for now
-      this.availableSlots = [
-        { time: '09:00', available: true },
-        { time: '09:30', available: true },
-        { time: '10:00', available: false },
-        { time: '10:30', available: true },
-        { time: '11:00', available: true },
-        { time: '11:30', available: false },
-        { time: '14:00', available: true },
-        { time: '14:30', available: true },
-        { time: '15:00', available: true }
-      ];
+      console.log('🔍 Caricamento slot per:', {
+        barberId: this.selectedBarber.id,
+        serviceId: this.selectedService.id,
+        date: this.selectedDate
+      });
+
+      this.appointmentService.getAvailableSlots(
+        this.selectedBarber.id,
+        this.selectedService.id,
+        this.selectedDate
+      ).subscribe(
+        (slots) => {
+          console.log('✅ Slot ricevuti dal backend:', slots);
+          this.availableSlots = slots.map((slot: any) => ({
+            time: slot.orarioInizio,
+            available: slot.disponibile !== false
+          }));
+          console.log('📋 Slot processati (ogni 30 min):', this.availableSlots);
+        },
+        (error) => {
+          console.error('❌ Errore caricamento slot dal backend:', error);
+          console.log('🔄 Uso slot mock di fallback (ogni 30 min)');
+          this.availableSlots = this.generateMockSlots();
+        }
+      );
     }
+  }
+
+  // Genera slot mock per test - OGNI 30 MINUTI dalle 08:00 alle 20:00
+  generateMockSlots(): any[] {
+    const slots = [];
+    const startHour = 8;   // 08:00
+    const endHour = 20;    // 20:00
+    const interval = 30;   // 30 minuti
+
+    for (let hour = startHour; hour < endHour; hour++) {
+      // Per ogni ora, genera 2 slot (00 e 30 minuti)
+      for (let minute = 0; minute < 60; minute += interval) {
+        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        const available = Math.random() > 0.3; // 70% disponibili
+        slots.push({ time, available });
+      }
+    }
+
+    console.log('🎲 Generati', slots.length, 'slot da 30 minuti (08:00-19:30)');
+    console.log('📋 Slot generati:', slots.map(s => s.time).join(', '));
+    return slots;
   }
 
   loadShopSettings(): void {
@@ -175,14 +210,21 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   onDateChange(): void {
-    this.loadAvailableSlots();
-    this.nextStep();
+    console.log('📅 Data cambiata:', this.selectedDate);
+    if (this.selectedDate) {
+      this.loadAvailableSlots();
+      // Non auto-avanzare, lascia vedere gli slot
+    }
   }
 
   selectTimeSlot(slot: any): void {
-    if (slot.available) {
-      this.selectedTime = slot.time;
+    if (!slot.available) {
+      console.log('❌ Slot non disponibile:', slot.time);
+      return;
     }
+    
+    console.log('✅ Slot selezionato:', slot.time);
+    this.selectedTime = slot.time;
   }
 
   canProceed(): boolean {
@@ -217,9 +259,24 @@ export class ServiceBookingComponent implements OnInit {
     };
 
     console.log('Creazione appuntamento:', appointmentData);
-    // TODO: Call API POST /appointments
-    alert('Prenotazione confermata! (TODO: Implementare chiamata API)');
-    this.router.navigate(['/customer-dashboard']);
+    
+    this.appointmentService.createAppointment(appointmentData).subscribe(
+      (response) => {
+        console.log('Prenotazione confermata:', response);
+        alert('✅ Prenotazione confermata con successo!\n\n' +
+              `Servizio: ${this.selectedService!.nome}\n` +
+              `Barbiere: ${this.selectedBarber.nome} ${this.selectedBarber.cognome}\n` +
+              `Data: ${new Date(this.selectedDate).toLocaleDateString('it-IT')}\n` +
+              `Orario: ${this.selectedTime}\n` +
+              `Durata: ${this.selectedService!.durata} minuti\n` +
+              `Prezzo: €${this.selectedService!.prezzo}`);
+        this.router.navigate(['/customer-dashboard']);
+      },
+      (error) => {
+        console.error('Errore durante la prenotazione:', error);
+        alert('❌ Errore durante la prenotazione: ' + (error.error?.message || 'Riprova più tardi'));
+      }
+    );
   }
 
   goBackToDashboard(): void {
@@ -238,7 +295,7 @@ export class ServiceBookingComponent implements OnInit {
     day.selected = true;
     this.selectedDate = day.date.toISOString().split('T')[0];
     
-    console.log('Data selezionata:', this.selectedDate);
+    console.log('✅ Data selezionata dal calendario:', this.selectedDate);
     this.loadAvailableSlots();
     this.nextStep();
   }

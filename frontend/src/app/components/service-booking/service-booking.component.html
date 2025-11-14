@@ -121,19 +121,39 @@
   <div class="booking-step" *ngIf="currentStep === 4">
     <h2>Scegli l'Orario</h2>
     <p class="orario-subtitle">Seleziona uno slot disponibile</p>
+    
+    <!-- DEBUG: Mostra stato caricamento -->
+    <div class="debug-info" style="text-align: center; margin-bottom: 1rem;">
+      <p *ngIf="availableSlots.length === 0" style="color: red; font-weight: bold;">
+        ⚠️ Nessuno slot caricato! Verifica la console (F12).
+      </p>
+      <p *ngIf="availableSlots.length > 0" style="color: green; font-weight: bold;">
+        ✅ {{ availableSlots.length }} slot caricati
+      </p>
+    </div>
+    
     <div class="time-slots-container">
       <div class="time-slots-grid">
         <div class="time-slot" 
-             *ngFor="let slot of availableSlots" 
+             *ngFor="let slot of availableSlots; let i = index" 
              [class.available]="slot.available" 
              [class.unavailable]="!slot.available"
              [class.selected]="selectedTime === slot.time"
-             (click)="selectTimeSlot(slot)">
+             (click)="selectTimeSlot(slot)"
+             [attr.data-index]="i">
           <span class="slot-time">{{ slot.time }}</span>
           <span class="slot-status" *ngIf="!slot.available">❌</span>
           <span class="slot-status" *ngIf="slot.available && selectedTime === slot.time">✅</span>
         </div>
       </div>
+    </div>
+    
+    <!-- Messaggio se nessuno slot -->
+    <div *ngIf="availableSlots.length === 0" class="no-slots-message">
+      <p>😔 Nessuno slot disponibile per questa data</p>
+      <button class="btn btn-secondary" (click)="previousStep()">
+        ← Cambia Data
+      </button>
     </div>
   </div>
 

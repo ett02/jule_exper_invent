@@ -83,7 +83,7 @@ public class BarbersService {
                 .orElseThrow(() -> new RuntimeException("Barber not found"));
 
         Availability availability = new Availability();
-        availability.setBarber(barber);
+        availability.setBarbiereId(barberId);
         availability.setGiorno(request.getGiorno());
         availability.setOrarioInizio(request.getOrarioInizio());
         availability.setOrarioFine(request.getOrarioFine());
@@ -92,7 +92,7 @@ public class BarbersService {
     }
 
     public List<Availability> getBarberAvailability(Long barberId) {
-        return availabilityRepository.findByBarberId(barberId);
+        return availabilityRepository.findByBarbiereId(barberId);
     }
 
     public List<Barbers> getBarbersByService(Long serviceId) {

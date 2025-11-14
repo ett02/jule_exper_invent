@@ -3,6 +3,7 @@ import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AppointmentService } from '../../services/appointment.service';
 
 @Component({
   selector: 'app-customer-dashboard',
@@ -19,6 +20,7 @@ export class CustomerDashboardComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
+    private appointmentService: AppointmentService,
     private router: Router
   ) {}
 
@@ -39,20 +41,26 @@ export class CustomerDashboardComponent implements OnInit {
 
   loadAppointments(): void {
     const userId = this.authService.getDecodedToken().id;
-    // TODO: Implement API call GET /appointments/user/{userId}
-    // Mock data for now
-    this.appointments = [
-      // Example:
-      // {
-      //   id: 1,
-      //   serviceName: 'Taglio Capelli Classico',
-      //   barberName: 'Marco Bianchi',
-      //   date: new Date('2025-11-20'),
-      //   time: '10:00',
-      //   duration: 30,
-      //   status: 'CONFIRMATO'
-      // }
-    ];
+    
+    this.appointmentService.getAppointmentsByUser(userId).subscribe(
+      (data) => {
+        console.log('Appuntamenti ricevuti:', data);
+        // Transform data per visualizzazione
+        this.appointments = data.map((app: any) => ({
+          id: app.id,
+          serviceName: app.service?.nome || 'Servizio',
+          barberName: `${app.barber?.nome || ''} ${app.barber?.cognome || ''}`,
+          date: app.data,
+          time: app.orarioInizio,
+          duration: app.service?.durata || 0,
+          status: app.stato
+        }));
+      },
+      (error) => {
+        console.error('Errore caricamento appuntamenti:', error);
+        this.appointments = [];
+      }
+    );
   }
 
   loadWaitingList(): void {
@@ -78,10 +86,17 @@ export class CustomerDashboardComponent implements OnInit {
 
   cancelAppointment(appointmentId: number): void {
     if (confirm('Sei sicuro di voler cancellare questo appuntamento?')) {
-      // TODO: Implement API call DELETE /appointments/{id}
-      console.log('Cancellazione appuntamento:', appointmentId);
-      alert('Appuntamento cancellato (TODO: Implementare API)');
-      this.loadAppointments();
+      this.appointmentService.cancelAppointment(appointmentId).subscribe(
+        () => {
+          console.log('Appuntamento cancellato:', appointmentId);
+          alert('✅ Appuntamento cancellato con successo!');
+          this.loadAppointments(); // Ricarica la lista
+        },
+        (error) => {
+          console.error('Errore cancellazione:', error);
+          alert('❌ Errore durante la cancellazione: ' + (error.error?.message || 'Riprova più tardi'));
+        }
+      );
     }
   }
 
