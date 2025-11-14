@@ -5,7 +5,7 @@
     <p class="subtitle">{{ selectedService?.nome || 'Seleziona servizio' }}</p>
   </div>
 
-  <!-- Progress Bar -->
+  <!-- Progress Wizard -->
   <div class="progress-wizard">
     <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
       <div class="step-number">1</div>
@@ -28,7 +28,7 @@
     </div>
   </div>
 
-  <!-- Step 1: Selezione Servizio (se non già selezionato) -->
+  <!-- Step 1: Selezione Servizio -->
   <div class="booking-step" *ngIf="currentStep === 1 && !selectedService">
     <h2>Scegli il Servizio</h2>
     <div class="services-grid">
@@ -48,11 +48,15 @@
   <div class="booking-step" *ngIf="currentStep === 2">
     <h2>Scegli il Barbiere</h2>
     <div class="barbers-grid">
-      <div class="barber-card" *ngFor="let barber of barbers" (click)="selectBarber(barber)">
-        <div class="barber-avatar">👨‍💼</div>
-        <h3>{{ barber.nome }} {{ barber.cognome }}</h3>
-        <p class="barber-experience">🎓 {{ barber.esperienza }}</p>
-        <p class="barber-specialty">✨ {{ barber.specialita }}</p>
+      <div class="barber-card" *ngFor="let barber of barbers" (click)="selectBarber(barber)" [class.selected]="selectedBarber?.id === barber.id">
+        <div class="barber-avatar">
+          <span class="avatar-icon">👨‍💼</span>
+        </div>
+        <div class="barber-info">
+          <h3>{{ barber.nome }} {{ barber.cognome }}</h3>
+          <p class="barber-experience">🎓 {{ barber.esperienza }}</p>
+          <p class="barber-specialty">✨ {{ barber.specialita }}</p>
+        </div>
         <button class="btn btn-primary">Seleziona</button>
       </div>
     </div>
@@ -62,37 +66,67 @@
   <div class="booking-step" *ngIf="currentStep === 3">
     <h2>Scegli la Data</h2>
     <div class="calendar-container">
-      <input type="date" class="date-picker" [(ngModel)]="selectedDate" (change)="onDateChange()" [min]="minDate">
+      <div class="calendar-wrapper">
+        <label for="date-input" class="calendar-label">📅 Seleziona una data</label>
+        <input type="date" id="date-input" class="date-picker" [(ngModel)]="selectedDate" (change)="onDateChange()" [min]="minDate">
+      </div>
     </div>
   </div>
 
   <!-- Step 4: Selezione Orario -->
   <div class="booking-step" *ngIf="currentStep === 4">
     <h2>Scegli l'Orario</h2>
-    <div class="time-slots-grid">
-      <div class="time-slot" *ngFor="let slot of availableSlots" 
-           [class.available]="slot.available" 
-           [class.unavailable]="!slot.available"
-           (click)="selectTimeSlot(slot)">
-        {{ slot.time }}
+    <p class="orario-subtitle">Seleziona uno slot disponibile</p>
+    <div class="time-slots-container">
+      <div class="time-slots-grid">
+        <div class="time-slot" 
+             *ngFor="let slot of availableSlots" 
+             [class.available]="slot.available" 
+             [class.unavailable]="!slot.available"
+             [class.selected]="selectedTime === slot.time"
+             (click)="selectTimeSlot(slot)">
+          <span class="slot-time">{{ slot.time }}</span>
+          <span class="slot-status" *ngIf="!slot.available">❌</span>
+          <span class="slot-status" *ngIf="slot.available && selectedTime === slot.time">✅</span>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Riepilogo e Conferma -->
   <div class="booking-summary" *ngIf="selectedService && selectedBarber && selectedDate && selectedTime">
-    <h3>📋 Riepilogo Prenotazione</h3>
-    <div class="summary-details">
-      <p><strong>Servizio:</strong> {{ selectedService.nome }}</p>
-      <p><strong>Barbiere:</strong> {{ selectedBarber.nome }} {{ selectedBarber.cognome }}</p>
-      <p><strong>Data:</strong> {{ selectedDate | date:'dd/MM/yyyy' }}</p>
-      <p><strong>Orario:</strong> {{ selectedTime }}</p>
-      <p><strong>Durata:</strong> {{ selectedService.durata }} minuti</p>
-      <p class="total-price"><strong>Prezzo:</strong> €{{ selectedService.prezzo }}</p>
+    <div class="summary-card">
+      <h3>📋 Riepilogo Prenotazione</h3>
+      <div class="summary-details">
+        <div class="summary-row">
+          <span class="summary-label">Servizio:</span>
+          <span class="summary-value">{{ selectedService.nome }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Barbiere:</span>
+          <span class="summary-value">{{ selectedBarber.nome }} {{ selectedBarber.cognome }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Data:</span>
+          <span class="summary-value">{{ selectedDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Orario:</span>
+          <span class="summary-value">{{ selectedTime }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Durata:</span>
+          <span class="summary-value">{{ selectedService.durata }} minuti</span>
+        </div>
+        <div class="summary-row total">
+          <span class="summary-label">Totale:</span>
+          <span class="summary-value price">€{{ selectedService.prezzo }}</span>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-confirm" (click)="confirmBooking()">
+        ✅ Conferma Prenotazione
+      </button>
     </div>
-    <button class="btn btn-primary btn-confirm" (click)="confirmBooking()">
-      ✅ Conferma Prenotazione
-    </button>
   </div>
 
   <!-- Navigation Buttons -->

@@ -14,7 +14,7 @@ import { Appointment } from '../../models/appointment.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './service-booking.component.html',
-  //styleUrls: ['./service-booking.component.css']
+  styleUrls: ['./service-booking.component.css']
 })
 export class ServiceBookingComponent implements OnInit {
   currentStep: number = 1;
