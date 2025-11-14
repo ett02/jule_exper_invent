@@ -1,6 +1,9 @@
 <div class="booking-container">
-  <!-- Header -->
+  <!-- Header con bottone Indietro -->
   <div class="booking-header">
+    <button class="btn-back-home" (click)="goBackToDashboard()">
+      ← Indietro
+    </button>
     <h1>💈 Prenota il Tuo Servizio</h1>
     <p class="subtitle">{{ selectedService?.nome || 'Seleziona servizio' }}</p>
   </div>
@@ -131,6 +134,9 @@
 
   <!-- Navigation Buttons -->
   <div class="navigation-buttons">
+    <button class="btn btn-outline" (click)="goBackToDashboard()">
+      ← Torna alla Dashboard
+    </button>
     <button class="btn btn-secondary" *ngIf="currentStep > 1" (click)="previousStep()">
       ← Indietro
     </button>

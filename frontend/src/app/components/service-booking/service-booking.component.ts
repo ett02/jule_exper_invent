@@ -150,4 +150,8 @@ export class ServiceBookingComponent implements OnInit {
     alert('Prenotazione confermata! (TODO: Implementare chiamata API)');
     this.router.navigate(['/customer-dashboard']);
   }
+
+  goBackToDashboard(): void {
+    this.router.navigate(['/customer-dashboard']);
+  }
 }
