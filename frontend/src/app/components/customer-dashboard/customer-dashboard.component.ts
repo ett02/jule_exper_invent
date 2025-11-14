@@ -41,43 +41,26 @@ export class CustomerDashboardComponent implements OnInit {
 
   loadAppointments(): void {
     const userId = this.authService.getDecodedToken().id;
-    
-    this.appointmentService.getAppointmentsByUser(userId).subscribe(
+    this.apiService.getAppointmentsByUserId(userId).subscribe(
       (data) => {
-        console.log('Appuntamenti ricevuti:', data);
-        // Transform data per visualizzazione
-        this.appointments = data.map((app: any) => ({
-          id: app.id,
-          serviceName: app.service?.nome || 'Servizio',
-          barberName: `${app.barber?.nome || ''} ${app.barber?.cognome || ''}`,
-          date: app.data,
-          time: app.orarioInizio,
-          duration: app.service?.durata || 0,
-          status: app.stato
-        }));
+        this.appointments = data;
       },
       (error) => {
-        console.error('Errore caricamento appuntamenti:', error);
-        this.appointments = [];
+        console.error('Error fetching appointments:', error);
       }
     );
   }
 
   loadWaitingList(): void {
     const userId = this.authService.getDecodedToken().id;
-    // TODO: Implement API call GET /waiting-list/customer/{customerId}
-    // Mock data for now
-    this.waitingList = [
-      // Example:
-      // {
-      //   id: 1,
-      //   serviceName: 'Taglio + Barba',
-      //   barberName: 'Luca Verdi',
-      //   requestedDate: new Date('2025-11-22'),
-      //   position: 2,
-      //   statusMessage: 'Sei il 2° in coda per questo giorno'
-      // }
-    ];
+    this.apiService.getWaitingListByCustomerId(userId).subscribe(
+      (data) => {
+        this.waitingList = data;
+      },
+      (error) => {
+        console.error('Error fetching waiting list:', error);
+      }
+    );
   }
 
   navigateToBooking(): void {
@@ -86,15 +69,12 @@ export class CustomerDashboardComponent implements OnInit {
 
   cancelAppointment(appointmentId: number): void {
     if (confirm('Sei sicuro di voler cancellare questo appuntamento?')) {
-      this.appointmentService.cancelAppointment(appointmentId).subscribe(
+      this.apiService.cancelAppointment(appointmentId).subscribe(
         () => {
-          console.log('Appuntamento cancellato:', appointmentId);
-          alert('✅ Appuntamento cancellato con successo!');
-          this.loadAppointments(); // Ricarica la lista
+          this.loadAppointments();
         },
         (error) => {
-          console.error('Errore cancellazione:', error);
-          alert('❌ Errore durante la cancellazione: ' + (error.error?.message || 'Riprova più tardi'));
+          console.error('Error canceling appointment:', error);
         }
       );
     }
@@ -102,10 +82,14 @@ export class CustomerDashboardComponent implements OnInit {
 
   removeFromWaitingList(waitingId: number): void {
     if (confirm('Vuoi rimuoverti dalla lista d\'attesa?')) {
-      // TODO: Implement API call DELETE /waiting-list/{id}
-      console.log('Rimozione dalla lista d\'attesa:', waitingId);
-      alert('Rimosso dalla coda (TODO: Implementare API)');
-      this.loadWaitingList();
+      this.apiService.removeFromWaitingList(waitingId).subscribe(
+        () => {
+          this.loadWaitingList();
+        },
+        (error) => {
+          console.error('Error removing from waiting list:', error);
+        }
+      );
     }
   }
 

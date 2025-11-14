@@ -68,13 +68,15 @@ export class ApiService {
     return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/user/${userId}`);
   }
 
-  updateService(id: number, service: Partial<Service>): Observable<Service> {
-    return this.http.put<Service>(`${this.apiUrl}/services/${id}`, service);
+  getWaitingListByCustomerId(customerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/waiting-list/customer/${customerId}`);
   }
 
-  updateBarber(id: number, barber: Partial<Barber>): Observable<Barber> {
-    return this.http.put<Barber>(`${this.apiUrl}/barbers/${id}`, barber);
+  cancelAppointment(appointmentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/appointments/${appointmentId}`);
   }
 
-
+  removeFromWaitingList(waitingId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/waiting-list/${waitingId}`);
+  }
 }
