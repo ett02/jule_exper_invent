@@ -6,6 +6,7 @@ import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,8 +35,7 @@ public class AppointmentsService {
     private AvailabilityRepository availabilityRepository;
 
     @Autowired
-    @Lazy
-    private WaitingListService waitingListService;
+    private WaitingListRepository waitingListRepository;
 
     private static final int SLOT_INTERVAL_MINUTES = 5;
 
@@ -45,12 +45,9 @@ public class AppointmentsService {
             throw new RuntimeException("Slot non disponibile");
         }
 
-        Users customer = usersRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Cliente non trovato"));
-        Barbers barber = barbersRepository.findById(request.getBarberId())
-                .orElseThrow(() -> new RuntimeException("Barbiere non trovato"));
-        Services service = servicesRepository.findById(request.getServiceId())
-                .orElseThrow(() -> new RuntimeException("Servizio non trovato"));
+        Users customer = getEntityById(usersRepository, request.getCustomerId(), "Cliente non trovato");
+        Barbers barber = getEntityById(barbersRepository, request.getBarberId(), "Barbiere non trovato");
+        Services service = getEntityById(servicesRepository, request.getServiceId(), "Servizio non trovato");
 
         Appointments appointment = new Appointments();
         appointment.setCustomer(customer);
@@ -61,6 +58,10 @@ public class AppointmentsService {
         appointment.setStato(Appointments.StatoAppuntamento.CONFIRMATO);
 
         return appointmentsRepository.save(appointment);
+    }
+
+    private <T, ID> T getEntityById(JpaRepository<T, ID> repository, ID id, String errorMessage) {
+        return repository.findById(id).orElseThrow(() -> new RuntimeException(errorMessage));
     }
 
     public List<Appointments> getAppointmentsByUser(Long userId) {
@@ -81,17 +82,14 @@ public class AppointmentsService {
 
     @Transactional
     public Appointments updateAppointment(Long id, AppointmentRequest request) {
-        Appointments appointment = appointmentsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appuntamento non trovato"));
+        Appointments appointment = getEntityById(appointmentsRepository, id, "Appuntamento non trovato");
 
         if (!isSlotAvailable(request.getBarberId(), request.getData(), request.getOrarioInizio(), request.getServiceId())) {
             throw new RuntimeException("Slot non disponibile");
         }
 
-        Barbers barber = barbersRepository.findById(request.getBarberId())
-                .orElseThrow(() -> new RuntimeException("Barbiere non trovato"));
-        Services service = servicesRepository.findById(request.getServiceId())
-                .orElseThrow(() -> new RuntimeException("Servizio non trovato"));
+        Barbers barber = getEntityById(barbersRepository, request.getBarberId(), "Barbiere non trovato");
+        Services service = getEntityById(servicesRepository, request.getServiceId(), "Servizio non trovato");
 
         appointment.setBarber(barber);
         appointment.setService(service);
@@ -105,17 +103,45 @@ public class AppointmentsService {
     public void cancelAppointment(Long id) {
         Appointments appointment = appointmentsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appuntamento non trovato"));
-        
-        Appointments cancelledAppointment = new Appointments();
-        cancelledAppointment.setBarber(appointment.getBarber());
-        cancelledAppointment.setService(appointment.getService());
-        cancelledAppointment.setData(appointment.getData());
-        cancelledAppointment.setOrarioInizio(appointment.getOrarioInizio());
-        
+
         appointment.setStato(Appointments.StatoAppuntamento.ANNULLATO);
         appointmentsRepository.save(appointment);
 
-        waitingListService.processWaitingListForCancelledAppointment(cancelledAppointment);
+        processWaitingListForCancelledAppointment(appointment);
+    }
+
+    private void processWaitingListForCancelledAppointment(Appointments cancelledAppointment) {
+        // Find the first in the waiting list for that barber, service, and date
+        Optional<WaitingList> firstInQueue = waitingListRepository
+                .findFirstByBarberIdAndServiceIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
+                        cancelledAppointment.getBarber().getId(),
+                        cancelledAppointment.getService().getId(),
+                        cancelledAppointment.getData(),
+                        WaitingList.StatoListaAttesa.IN_ATTESA
+                );
+
+        if (firstInQueue.isPresent()) {
+            WaitingList waitingEntry = firstInQueue.get();
+
+            // Automatically create the appointment for the first in the queue
+            AppointmentRequest appointmentRequest = new AppointmentRequest();
+            appointmentRequest.setCustomerId(waitingEntry.getCustomer().getId());
+            appointmentRequest.setBarberId(waitingEntry.getBarber().getId());
+            appointmentRequest.setServiceId(waitingEntry.getService().getId());
+            appointmentRequest.setData(cancelledAppointment.getData());
+            appointmentRequest.setOrarioInizio(cancelledAppointment.getOrarioInizio());
+
+            try {
+                createAppointment(appointmentRequest);
+
+                // Update the status in the waiting list
+                waitingEntry.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
+                waitingListRepository.save(waitingEntry);
+
+            } catch (Exception e) {
+                System.err.println("Error in the automatic assignment of the slot: " + e.getMessage());
+            }
+        }
     }
 
     public List<AvailableSlotResponse> getAvailableSlots(Long barberId, Long serviceId, LocalDate date) {
@@ -162,15 +188,10 @@ public class AppointmentsService {
         List<Appointments> existingAppointments = appointmentsRepository
                 .findByBarberIdAndDataAndStato(barberId, date, Appointments.StatoAppuntamento.CONFIRMATO);
 
-        for (Appointments appointment : existingAppointments) {
+        return existingAppointments.stream().noneMatch(appointment -> {
             LocalTime existingStart = appointment.getOrarioInizio();
             LocalTime existingEnd = existingStart.plusMinutes(appointment.getService().getDurata());
-
-            if (orarioInizio.isBefore(existingEnd) && orarioFine.isAfter(existingStart)) {
-                return false;
-            }
-        }
-
-        return true;
+            return orarioInizio.isBefore(existingEnd) && orarioFine.isAfter(existingStart);
+        });
     }
 }

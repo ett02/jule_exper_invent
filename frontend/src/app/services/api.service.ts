@@ -57,4 +57,16 @@ export class ApiService {
   getAppointmentsByUserId(userId: number): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/user/${userId}`);
   }
+
+  getWaitingListByCustomerId(customerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/waiting-list/customer/${customerId}`);
+  }
+
+  cancelAppointment(appointmentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/appointments/${appointmentId}`);
+  }
+
+  removeFromWaitingList(waitingId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/waiting-list/${waitingId}`);
+  }
 }
