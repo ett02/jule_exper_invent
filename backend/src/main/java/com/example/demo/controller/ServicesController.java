@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
 
@@ -49,5 +50,10 @@ public class ServicesController {
     @GetMapping("/{id}/barbers")
     public List<Barbers> getBarbersByService(@PathVariable Long id) {
         return barbersService.getBarbersByService(id);
+    }
+
+    @PutMapping("/{id}")
+    public Services updateService(@PathVariable @NonNull Long id, @RequestBody @NonNull Services service) {
+        return servicesService.updateService(id, service);
     }
 }

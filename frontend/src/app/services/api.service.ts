@@ -6,6 +6,7 @@ import { Barber } from '../models/barber.model';
 import { Appointment } from '../models/appointment.model';
 import { Availability } from '../models/availability.model';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -41,6 +42,15 @@ export class ApiService {
     return this.http.delete<void>(`${this.apiUrl}/barbers/${id}`);
   }
 
+  updateAppointmentStatus(id: number, status: string): Observable<Appointment> {
+    return this.http.put<Appointment>(`${this.apiUrl}/appointments/${id}/status`, { status });
+  }
+
+
+  getAppointmentsByDate(date: string): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/by-date`, { params: { date } });
+  }
+
   // Customer facing methods
   getBarbersForService(serviceId: number): Observable<Barber[]> {
     return this.http.get<Barber[]>(`${this.apiUrl}/services/${serviceId}/barbers`);
@@ -57,4 +67,14 @@ export class ApiService {
   getAppointmentsByUserId(userId: number): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/user/${userId}`);
   }
+
+  updateService(id: number, service: Partial<Service>): Observable<Service> {
+    return this.http.put<Service>(`${this.apiUrl}/services/${id}`, service);
+  }
+
+  updateBarber(id: number, barber: Partial<Barber>): Observable<Barber> {
+    return this.http.put<Barber>(`${this.apiUrl}/barbers/${id}`, barber);
+  }
+
+
 }

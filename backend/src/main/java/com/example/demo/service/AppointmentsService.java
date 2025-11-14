@@ -206,6 +206,19 @@ public class AppointmentsService {
         return appointmentsRepository.save(appointment);
     }
 
+    public Appointments updateAppointmentStatus(Long id, String newStatus) {
+        Appointments appointment = getAppointmentById(id);
+        
+        // Converte la stringa nello stato Enum corretto
+        try {
+            Appointments.StatoAppuntamento statoEnum = Appointments.StatoAppuntamento.valueOf(newStatus.toUpperCase());
+            appointment.setStato(statoEnum);
+            return appointmentsRepository.save(appointment);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Stato non valido: " + newStatus);
+        }
+    }
+
     public List<Appointments> getAppointmentsByUser(Long userId) {
         return appointmentsRepository.findByCustomerId(userId);
     }
@@ -232,6 +245,10 @@ public class AppointmentsService {
                 appointment.getData()
             );
         }
+    }
+
+    public List<Appointments> getAppointmentsByDate(LocalDate date) {
+        return appointmentsRepository.findByDataOrderByOrarioInizioAsc(date);
     }
 
     public List<Appointments> getAllAppointments() {

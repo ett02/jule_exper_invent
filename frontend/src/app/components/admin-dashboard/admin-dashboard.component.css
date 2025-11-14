@@ -18,12 +18,32 @@
   margin-bottom: 0.5rem;
 }
 
-/* Sezioni (Servizi, Barbieri) */
+/* ===========================
+   NUOVO LAYOUT A GRIGLIA (3 COLONNE)
+   =========================== */
+
+.dashboard-grid-3col {
+  display: grid;
+  /* Colonne: 1fr (stretto) | 2fr (largo) | 1fr (stretto) */
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 2rem;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+.grid-col-left,
+.grid-col-center,
+.grid-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; /* Spazio tra i blocchi nella stessa colonna */
+}
+
+/* Sezioni Dashboard */
 .dashboard-section {
   background: var(--color-white);
   border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 1.5rem; /* Padding ridotto per blocchi più piccoli */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -36,86 +56,20 @@
   padding-bottom: 0.5rem;
 }
 
-/* Lista Servizi/Barbieri */
-.service-item,
-.barber-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: var(--color-background);
-  border-radius: 8px;
-  border-left: 4px solid var(--color-primary);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.service-item:hover,
-.barber-item:hover {
-  transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
-}
-
-.service-info,
-.barber-info {
-  flex: 1;
-}
-
-.service-info h3,
-.barber-info h3 {
-  font-size: var(--font-size-h3);
+.dashboard-section h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.25rem; /* h3 più piccoli per le colonne laterali */
   color: var(--color-text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.service-details,
-.barber-details {
-  font-size: var(--font-size-small);
-  color: var(--color-text-secondary);
-}
-
-.service-details span,
-.barber-details span {
-  margin-right: 1rem;
-}
-
-/* Bottone Elimina */
-.btn-delete {
-  background: #dc3545;
-  color: var(--color-white);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: var(--font-size-small);
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-delete:hover {
-  background: #c82333;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-}
-
-.btn-delete:active {
-  background: #bd2130;
-  transform: translateY(0);
-}
-
-/* Form Aggiungi Servizio/Barbiere */
-.add-form {
-  background: var(--color-background);
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-top: 1rem;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
   margin-bottom: 1rem;
+}
+
+/* ===========================
+   COLONNA SINISTRA (Forms)
+   =========================== */
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .form-group {
@@ -130,13 +84,24 @@
   font-weight: 600;
 }
 
-.form-group input,
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="checkbox"],
 .form-group textarea {
   padding: 0.75rem;
   border: 2px solid #ddd;
   border-radius: 6px;
-  font-size: var(--font-size-body);
+  font-size: 0.9rem;
   transition: border-color 0.3s ease;
+}
+
+.form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
+}
+
+.form-group label input {
+  display: inline-block;
 }
 
 .form-group input:focus,
@@ -146,89 +111,220 @@
   box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
 }
 
-/* Bottone Aggiungi */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.btn-add, .btn-cancel {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
 .btn-add {
   background: var(--color-primary);
   color: var(--color-white);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: var(--font-size-body);
-  font-weight: 600;
-  transition: all 0.3s ease;
-  margin-top: 1rem;
 }
-
 .btn-add:hover {
   background: var(--color-primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
 }
 
-.btn-add:active {
-  background: var(--color-primary-active);
-  transform: translateY(0);
+.btn-cancel {
+  background: #6c757d;
+  color: var(--color-white);
+}
+.btn-cancel:hover {
+  background: #5a6268;
 }
 
-/* Shop Hours Section */
-.shop-hours-item {
+/* ===========================
+   COLONNA CENTRALE (Appuntamenti)
+   =========================== */
+.appointments-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.date-picker {
+  padding: 0.5rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.appointment-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   padding: 1rem;
-  margin-bottom: 1rem;
   background: var(--color-background);
   border-radius: 8px;
-  border-left: 4px solid var(--color-primary);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-left: 5px solid var(--color-primary); /* Default: CONFERMATO */
 }
 
-.shop-hours-item:hover {
-  transform: translateX(5px);
-  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
+.appointment-card.status-annullato {
+  border-color: #dc3545;
+  opacity: 0.7;
+  background: #fdf2f2;
 }
 
-.day-info h3 {
-  font-size: var(--font-size-h3);
+.appointment-card.status-in_corso {
+  border-color: #0d6efd; /* Blu per "in corso" */
+  background: #f0f6ff;
+}
+
+.appointment-card.status-completato {
+  border-color: #198754; /* Verde per "completato" */
+  background: #f2fbf5;
+}
+
+.app-time {
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: 0.25rem;
+  padding: 0 1rem;
+  border-right: 2px solid var(--color-border);
 }
 
-.hours-details {
-  font-size: var(--font-size-small);
+.app-details {
+  flex: 1;
+}
+
+.app-details h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+}
+
+.app-details p {
+  font-size: 0.9rem;
   color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
 }
 
-.closed-badge {
-  color: #dc3545;
-  font-weight: 600;
+.app-status {
+  text-align: right;
+  min-width: 120px;
 }
 
-.not-configured {
-  color: #ffc107;
-  font-weight: 600;
-}
-
-.btn-edit {
-  background: var(--color-primary);
-  color: var(--color-white);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
   font-size: var(--font-size-small);
   font-weight: 600;
-  transition: all 0.3s ease;
+  text-transform: uppercase;
+  background: #6c757d;
+  color: white;
+  margin-bottom: 0.5rem;
 }
 
-.btn-edit:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 140, 0, 0.3);
+.status-badge-confermato { background: var(--color-primary); }
+.status-badge-annullato { background: #dc3545; }
+.status-badge-in_corso { background: #0d6efd; }
+.status-badge-completato { background: #198754; }
+
+.status-actions button {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Modal */
+.btn-status-start { background: #0d6efd; color: white; }
+.btn-status-complete { background: #198754; color: white; }
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+}
+.empty-icon { font-size: 3rem; }
+.empty-state h3 { font-size: 1.2rem; }
+.empty-state p { color: var(--color-text-secondary); }
+
+
+/* ===========================
+   COLONNA DESTRA (Liste)
+   =========================== */
+.list-section {
+  padding: 1rem 1.5rem;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--color-background);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-edit-small, .btn-delete-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-edit-small { background: var(--color-primary); color: white; }
+.btn-delete-small { background: #dc3545; color: white; }
+
+.shop-hours-item-small {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.shop-hours-item-small:last-child {
+  border-bottom: none;
+}
+
+.day-info-small {
+  display: flex;
+  flex-direction: column;
+}
+.hours-details { font-size: 0.85rem; color: #333; }
+.closed-badge { font-size: 0.85rem; color: #dc3545; font-weight: 600; }
+.not-configured { font-size: 0.85rem; color: #ffc107; font-weight: 600; }
+
+
+/* ===========================
+   MODAL (Invariato)
+   =========================== */
 .modal {
   position: fixed;
   top: 0;
@@ -241,7 +337,6 @@
   align-items: center;
   z-index: 1000;
 }
-
 .modal-content {
   background: var(--color-white);
   padding: 2rem;
@@ -250,62 +345,63 @@
   max-width: 600px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
+.modal-content h3 { margin-bottom: 1.5rem; }
+.form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
 
-.modal-content h3 {
-  margin-bottom: 1.5rem;
-  color: var(--color-text-primary);
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
+@media (max-width: 1200px) {
+  .dashboard-grid-3col {
+    /* Passa a 2 colonne: Centrale (Appuntamenti) + Destra (Gestione) */
+    grid-template-columns: 2fr 1fr;
+  }
+  .grid-col-left {
+    /* La colonna sinistra si sposta nella destra */
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+  }
+  .grid-col-center {
+    grid-column: 1 / 3; /* Centrale occupa tutta la larghezza in alto */
+    grid-row: 1 / 2;
+  }
+  .grid-col-right {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4; /* Sotto la colonna sinistra */
+  }
 }
 
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.btn-cancel {
-  background: #6c757d;
-  color: var(--color-white);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: var(--font-size-body);
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-cancel:hover {
-  background: #5a6268;
-  transform: translateY(-2px);
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   .admin-dashboard {
     padding: 1rem;
   }
-
-  .dashboard-section {
-    padding: 1.5rem;
+  .dashboard-grid-3col {
+    /* Colonna singola */
+    grid-template-columns: 1fr;
   }
-
-  .service-item,
-  .barber-item {
-    flex-direction: column;
-    align-items: flex-start;
+  .grid-col-left,
+  .grid-col-center,
+  .grid-col-right {
+    grid-column: 1 / -1; /* Tutti occupano 1 colonna */
+    grid-row: auto; /* Ordine automatico */
   }
-
-  .btn-delete {
-    margin-top: 1rem;
-    width: 100%;
-  }
-
   .form-row {
     grid-template-columns: 1fr;
   }
-
-  .modal-content {
-    min-width: 90%;
-    padding: 1.5rem;
+  .appointment-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .app-time {
+    border-right: none;
+    border-bottom: 2px solid var(--color-border);
+    padding: 0 0 0.5rem 0;
+    text-align: center;
+  }
+  .app-status {
+    text-align: left;
   }
 }

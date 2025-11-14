@@ -1,139 +1,172 @@
 <div class="admin-dashboard">
-  <!-- Header -->
   <div class="dashboard-header">
     <h1>Dashboard Amministratore</h1>
   </div>
 
-  <!-- Sezione Servizi -->
-  <div class="dashboard-section">
-    <h2>Servizi</h2>
-    
-    <!-- Lista Servizi -->
-    <div *ngFor="let service of services" class="service-item">
-      <div class="service-info">
-        <h3>{{ service.nome }}</h3>
-        <div class="service-details">
-          <span>⏱️ {{ service.durata }} min</span>
-          <span>💰 {{ service.prezzo }} €</span>
-        </div>
-      </div>
-      <button class="btn-delete" (click)="deleteService(service.id)">Elimina</button>
-    </div>
+  <div class="dashboard-grid-3col">
 
-    <!-- Form Aggiungi Servizio -->
-    <div class="add-form">
-      <h3>Aggiungi Servizio</h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nome</label>
-          <input type="text" placeholder="es. Taglio Capelli" />
-        </div>
-        <div class="form-group">
-          <label>Durata (min)</label>
-          <input type="number" placeholder="30" />
-        </div>
-        <div class="form-group">
-          <label>Prezzo (€)</label>
-          <input type="number" placeholder="25.00" />
-        </div>
+    <div class="grid-col-left">
+      <div class="dashboard-section">
+        <h3>{{ isEditingService ? 'Modifica Servizio' : 'Aggiungi Servizio' }}</h3>
+        <form class="add-form" (ngSubmit)="saveService()">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" placeholder="es. Taglio Capelli" [(ngModel)]="serviceForm.nome" name="serviceNome" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Durata (min)</label>
+              <input type="number" placeholder="30" [(ngModel)]="serviceForm.durata" name="serviceDurata" required />
+            </div>
+            <div class="form-group">
+              <label>Prezzo (€)</label>
+              <input type="number" placeholder="25.00" [(ngModel)]="serviceForm.prezzo" name="servicePrezzo" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Descrizione</label>
+            <textarea rows="3" placeholder="Breve descrizione..." [(ngModel)]="serviceForm.descrizione" name="serviceDesc"></textarea>
+          </div>
+          <button type="submit" class="btn-add">{{ isEditingService ? 'Salva Modifiche' : 'Aggiungi' }}</button>
+          <button type="button" class="btn-cancel" *ngIf="isEditingService" (click)="resetServiceForm()">Annulla</button>
+        </form>
       </div>
-      <div class="form-group">
-        <label>Descrizione</label>
-        <textarea rows="3" placeholder="Breve descrizione del servizio..."></textarea>
-      </div>
-      <button class="btn-add">Aggiungi</button>
-    </div>
-  </div>
 
-  <!-- Sezione Barbieri -->
-  <div class="dashboard-section">
-    <h2>Barbieri</h2>
-    
-    <!-- Lista Barbieri -->
-    <div *ngFor="let barber of barbers" class="barber-item">
-      <div class="barber-info">
-        <h3>{{ barber.nome }} {{ barber.cognome }}</h3>
-        <div class="barber-details">
-          <span *ngIf="barber.esperienza">📅 {{ barber.esperienza }}</span>
-          <span *ngIf="barber.specialita">✂️ {{ barber.specialita }}</span>
-        </div>
-      </div>
-      <button class="btn-delete" (click)="deleteBarber(barber.id)">Elimina</button>
-    </div>
-
-    <!-- Form Aggiungi Barbiere -->
-    <div class="add-form">
-      <h3>Aggiungi Barbiere</h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nome</label>
-          <input type="text" placeholder="Nome" />
-        </div>
-        <div class="form-group">
-          <label>Cognome</label>
-          <input type="text" placeholder="Cognome" />
-        </div>
-        <div class="form-group">
-          <label>Esperienza</label>
-          <input type="text" placeholder="es. 5 anni" />
-        </div>
-        <div class="form-group">
-          <label>Specialità</label>
-          <input type="text" placeholder="es. Taglio classico" />
-        </div>
-      </div>
-      <button class="btn-add">Aggiungi</button>
-    </div>
-  </div>
-
-  <!-- Sezione Orari di Apertura -->
-  <div class="dashboard-section">
-    <h2>⏰ Orari di Apertura Salone</h2>
-    
-    <!-- Lista Orari Settimanali -->
-    <div *ngFor="let day of weekDays" class="shop-hours-item">
-      <div class="day-info">
-        <h3>{{ day.name }}</h3>
-        <div class="hours-details" *ngIf="day.hours && !day.hours.isChiuso">
-          <span>🕐 {{ day.hours.orarioApertura }} - {{ day.hours.orarioChiusura }}</span>
-        </div>
-        <div class="hours-details" *ngIf="day.hours && day.hours.isChiuso">
-          <span class="closed-badge">🚫 CHIUSO</span>
-        </div>
-        <div class="hours-details" *ngIf="!day.hours">
-          <span class="not-configured">⚠️ Non configurato</span>
-        </div>
-      </div>
-      <button class="btn-edit" (click)="editShopHours(day.value)">Modifica</button>
-    </div>
-
-    <!-- Form Configura Orari (nascosto, mostrato con modal) -->
-    <div class="modal" *ngIf="showShopHoursModal">
-      <div class="modal-content">
-        <h3>Configura Orari per {{ getSelectedDayName() }}</h3>
-        <form>
+      <div class="dashboard-section">
+        <h3>{{ isEditingBarber ? 'Modifica Barbiere' : 'Aggiungi Barbiere' }}</h3>
+        <form class="add-form" (ngSubmit)="saveBarber()">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" placeholder="Nome" [(ngModel)]="barberForm.nome" name="barberNome" required />
+          </div>
+          <div class="form-group">
+            <label>Cognome</label>
+            <input type="text" placeholder="Cognome" [(ngModel)]="barberForm.cognome" name="barberCognome" required />
+          </div>
+          <div class="form-group">
+            <label>Esperienza</label>
+            <input type="text" placeholder="es. 5 anni" [(ngModel)]="barberForm.esperienza" name="barberEsperienza" />
+          </div>
+          <div class="form-group">
+            <label>Specialità</label>
+            <input type="text" placeholder="es. Taglio classico" [(ngModel)]="barberForm.specialita" name="barberSpecialita" />
+          </div>
           <div class="form-group">
             <label>
-              <input type="checkbox" [(ngModel)]="shopHoursForm.isChiuso" name="isChiuso" />
-              Salone Chiuso
+              <input type="checkbox" [(ngModel)]="barberForm.is_active" name="barberActive" />
+              Attivo (prenotabile)
             </label>
           </div>
-          <div class="form-row" *ngIf="!shopHoursForm.isChiuso">
-            <div class="form-group">
-              <label>Orario Apertura</label>
-              <input type="time" [(ngModel)]="shopHoursForm.orarioApertura" name="orarioApertura" />
-            </div>
-            <div class="form-group">
-              <label>Orario Chiusura</label>
-              <input type="time" [(ngModel)]="shopHoursForm.orarioChiusura" name="orarioChiusura" />
-            </div>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn-add" (click)="saveShopHours()">Salva</button>
-            <button type="button" class="btn-cancel" (click)="closeShopHoursModal()">Annulla</button>
-          </div>
+          <button type="submit" class="btn-add">{{ isEditingBarber ? 'Salva Modifiche' : 'Aggiungi' }}</button>
+          <button type="button" class="btn-cancel" *ngIf="isEditingBarber" (click)="resetBarberForm()">Annulla</button>
         </form>
       </div>
     </div>
+
+    <div class="grid-col-center">
+      <div class="dashboard-section">
+        <div class="appointments-header">
+          <h2>Appuntamenti del Giorno</h2>
+          <input type="date" [value]="selectedDate" (change)="onDateChange($event)" class="date-picker" />
+        </div>
+
+        <div class="appointments-list">
+          <div *ngIf="todaysAppointments.length === 0" class="empty-state">
+            <span class="empty-icon">📅</span>
+            <h3>Nessun appuntamento</h3>
+            <p>Nessun appuntamento trovato per il {{ selectedDate | date:'dd/MM/yyyy' }}.</p>
+          </div>
+
+          <div *ngFor="let app of todaysAppointments" class="appointment-card" [class]="'status-' + app.stato.toLowerCase()">
+            <div class="app-time">{{ app.orarioInizio | slice:0:5 }}</div>
+            <div class="app-details">
+              <h4>{{ app.service.nome || 'Servizio non trovato' }}</h4>
+              <p>
+                <strong>Barbiere:</strong> {{ app.barber.nome }} {{ app.barber.cognome }}<br>
+                <strong>Cliente ID:</strong> {{ app.id }}
+              </p>
+            </div>
+            <div class="app-status">
+              <span class="status-badge" [class]="'status-badge-' + app.stato.toLowerCase()">{{ app.stato }}</span>
+              
+              <div class="status-actions" *ngIf="app.stato === 'CONFIRMATO'">
+                <button class="btn-status-start" (click)="setAppointmentStatus(app, 'IN_CORSO')">Inizia</button>
+              </div>
+              <div class="status-actions" *ngIf="app.stato === 'IN_CORSO'">
+                <button class="btn-status-complete" (click)="setAppointmentStatus(app, 'COMPLETATO')">Completa</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="grid-col-right">
+      <div class="dashboard-section list-section">
+        <h2>Lista Servizi</h2>
+        <div *ngFor="let service of services" class="list-item">
+          <span>{{ service.nome }} ({{ service.durata }} min)</span>
+          <div class="item-actions">
+            <button class="btn-edit-small" (click)="editService(service)">Modifica</button>
+            <button class="btn-delete-small" (click)="deleteService(service.id)">X</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-section list-section">
+        <h2>Lista Barbieri</h2>
+        <div *ngFor="let barber of barbers" class="list-item">
+          <span>{{ barber.nome }} {{ barber.cognome }}</span>
+          <div class="item-actions">
+            <button class="btn-edit-small" (click)="editBarber(barber)">Modifica</button>
+            <button class="btn-delete-small" (click)="deleteBarber(barber.id)">X</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-section list-section">
+        <h2>⏰ Orari Salone</h2>
+        <div *ngFor="let day of weekDays" class="shop-hours-item-small">
+          <div class="day-info-small">
+            <strong>{{ day.name }}</strong>
+            <span *ngIf="day.hours && !day.hours.isChiuso" class="hours-details">
+              {{ day.hours.orarioApertura | slice:0:5 }} - {{ day.hours.orarioChiusura | slice:0:5 }}
+            </span>
+            <span *ngIf="day.hours && day.hours.isChiuso" class="closed-badge">🚫 CHIUSO</span>
+            <span *ngIf="!day.hours" class="not-configured">⚠️ N/D</span>
+          </div>
+          <button class="btn-edit-small" (click)="editShopHours(day.value)">Modifica</button>
+        </div>
+      </div>
+    </div>
+
+  </div> <div class="modal" *ngIf="showShopHoursModal">
+    <div class="modal-content">
+      <h3>Configura Orari per {{ getSelectedDayName() }}</h3>
+      <form (ngSubmit)="saveShopHours()">
+        <div class="form-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="shopHoursForm.isChiuso" name="isChiuso" />
+            Salone Chiuso
+          </label>
+        </div>
+        <div class="form-row" *ngIf="!shopHoursForm.isChiuso">
+          <div class="form-group">
+            <label>Orario Apertura</label>
+            <input type="time" [(ngModel)]="shopHoursForm.orarioApertura" name="orarioApertura" />
+          </div>
+          <div class="form-group">
+            <label>Orario Chiusura</label>
+            <input type="time" [(ngModel)]="shopHoursForm.orarioChiusura" name="orarioChiusura" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-add">Salva</button>
+          <button type="button" class="btn-cancel" (click)="closeShopHoursModal()">Annulla</button>
+        </div>
+      </form>
+    </div>
   </div>
+
 </div>
