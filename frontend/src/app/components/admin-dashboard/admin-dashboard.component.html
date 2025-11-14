@@ -1,43 +1,88 @@
-<div class="dashboard-container">
-  <h1>Dashboard Amministratore</h1>
+<div class="admin-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1>Dashboard Amministratore</h1>
+  </div>
 
-  <div class="section">
+  <!-- Sezione Servizi -->
+  <div class="dashboard-section">
     <h2>Servizi</h2>
-    <ul class="item-list">
-      <li *ngFor="let service of services">
-        <span>{{ service.nome }} - {{ service.prezzo | number:'1.2-2' }} €</span>
-        <button (click)="deleteService(service.id)">Elimina</button>
-      </li>
-    </ul>
-    <div class="form-container">
+    
+    <!-- Lista Servizi -->
+    <div *ngFor="let service of services" class="service-item">
+      <div class="service-info">
+        <h3>{{ service.nome }}</h3>
+        <div class="service-details">
+          <span>⏱️ {{ service.durata }} min</span>
+          <span>💰 {{ service.prezzo }} €</span>
+        </div>
+      </div>
+      <button class="btn-delete" (click)="deleteService(service.id)">Elimina</button>
+    </div>
+
+    <!-- Form Aggiungi Servizio -->
+    <div class="add-form">
       <h3>Aggiungi Servizio</h3>
-      <form (ngSubmit)="createService()">
-        <input type="text" [(ngModel)]="newService.nome" name="nome" placeholder="Nome" required>
-        <input type="number" [(ngModel)]="newService.prezzo" name="prezzo" placeholder="Prezzo" required>
-        <input type="number" [(ngModel)]="newService.durata" name="durata" placeholder="Durata (minuti)" required>
-        <input type="text" [(ngModel)]="newService.descrizione" name="descrizione" placeholder="Descrizione">
-        <button type="submit">Aggiungi</button>
-      </form>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" placeholder="es. Taglio Capelli" />
+        </div>
+        <div class="form-group">
+          <label>Durata (min)</label>
+          <input type="number" placeholder="30" />
+        </div>
+        <div class="form-group">
+          <label>Prezzo (€)</label>
+          <input type="number" placeholder="25.00" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Descrizione</label>
+        <textarea rows="3" placeholder="Breve descrizione del servizio..."></textarea>
+      </div>
+      <button class="btn-add">Aggiungi</button>
     </div>
   </div>
 
-  <div class="section">
+  <!-- Sezione Barbieri -->
+  <div class="dashboard-section">
     <h2>Barbieri</h2>
-    <ul class="item-list">
-      <li *ngFor="let barber of barbers">
-        <span>{{ barber.nome }} {{ barber.cognome }}</span>
-        <button (click)="deleteBarber(barber.id)">Elimina</button>
-      </li>
-    </ul>
-    <div class="form-container">
+    
+    <!-- Lista Barbieri -->
+    <div *ngFor="let barber of barbers" class="barber-item">
+      <div class="barber-info">
+        <h3>{{ barber.nome }} {{ barber.cognome }}</h3>
+        <div class="barber-details">
+          <span *ngIf="barber.esperienza">📅 {{ barber.esperienza }}</span>
+          <span *ngIf="barber.specialita">✂️ {{ barber.specialita }}</span>
+        </div>
+      </div>
+      <button class="btn-delete" (click)="deleteBarber(barber.id)">Elimina</button>
+    </div>
+
+    <!-- Form Aggiungi Barbiere -->
+    <div class="add-form">
       <h3>Aggiungi Barbiere</h3>
-      <form (ngSubmit)="createBarber()">
-        <input type="text" [(ngModel)]="newBarber.nome" name="b_nome" placeholder="Nome" required>
-        <input type="text" [(ngModel)]="newBarber.cognome" name="cognome" placeholder="Cognome" required>
-        <input type="text" [(ngModel)]="newBarber.esperienza" name="esperienza" placeholder="Esperienza">
-        <input type="text" [(ngModel)]="newBarber.specialita" name="specialita" placeholder="Specialità">
-        <button type="submit">Aggiungi</button>
-      </form>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" placeholder="Nome" />
+        </div>
+        <div class="form-group">
+          <label>Cognome</label>
+          <input type="text" placeholder="Cognome" />
+        </div>
+        <div class="form-group">
+          <label>Esperienza</label>
+          <input type="text" placeholder="es. 5 anni" />
+        </div>
+        <div class="form-group">
+          <label>Specialità</label>
+          <input type="text" placeholder="es. Taglio classico" />
+        </div>
+      </div>
+      <button class="btn-add">Aggiungi</button>
     </div>
   </div>
 </div>

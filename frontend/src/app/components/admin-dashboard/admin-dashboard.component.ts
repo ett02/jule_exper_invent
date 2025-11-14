@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Service } from '../../models/service.model';
 import { Barber } from '../../models/barber.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -13,24 +14,13 @@ import { Barber } from '../../models/barber.model';
   styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent implements OnInit {
-  services: Service[] = [];
-  barbers: Barber[] = [];
+  services: any[] = [];
+  barbers: any[] = [];
 
-  newService: Partial<Service> = {
-    nome: '',
-    durata: 0,
-    prezzo: 0,
-    descrizione: ''
-  };
-
-  newBarber: Partial<Barber> = {
-    nome: '',
-    cognome: '',
-    esperienza: '',
-    specialita: ''
-  };
-
-  constructor(private apiService: ApiService) { }
+  constructor(
+    private apiService: ApiService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadServices();
@@ -38,36 +28,41 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadServices(): void {
-    this.apiService.getAllServices().subscribe((data: Service[]) => this.services = data);
+    this.apiService.getAllServices().subscribe(
+      (data) => {
+        this.services = data;
+      },
+      (error) => {
+        console.error('Errore caricamento servizi:', error);
+      }
+    );
   }
 
   loadBarbers(): void {
-    this.apiService.getAllBarbers().subscribe((data: Barber[]) => this.barbers = data);
+    // TODO: Implementare API GET /barbers
+    // Mock data per ora
+    this.barbers = [
+      { id: 1, nome: 'Marco', cognome: 'Bianchi', esperienza: '10 anni', specialita: 'Taglio classico' },
+      { id: 2, nome: 'Luca', cognome: 'Verdi', esperienza: '5 anni', specialita: 'Barba' },
+      { id: 3, nome: 'Giuseppe', cognome: 'Neri', esperienza: '8 anni', specialita: 'Sfumature' }
+    ];
   }
 
-  createService(): void {
-    this.apiService.createService(this.newService).subscribe(() => {
+  deleteService(serviceId: number): void {
+    if (confirm('Sei sicuro di voler eliminare questo servizio?')) {
+      // TODO: Implementare API DELETE /services/{id}
+      console.log('Elimina servizio:', serviceId);
+      alert('Servizio eliminato (TODO: Implementare API)');
       this.loadServices();
-      this.newService = { nome: '', durata: 0, prezzo: 0, descrizione: '' };
-    });
-  }
-
-  deleteService(id: number | undefined): void {
-    if (id) {
-      this.apiService.deleteService(id).subscribe(() => this.loadServices());
     }
   }
 
-  createBarber(): void {
-    this.apiService.createBarber(this.newBarber).subscribe(() => {
+  deleteBarber(barberId: number): void {
+    if (confirm('Sei sicuro di voler eliminare questo barbiere?')) {
+      // TODO: Implementare API DELETE /barbers/{id}
+      console.log('Elimina barbiere:', barberId);
+      alert('Barbiere eliminato (TODO: Implementare API)');
       this.loadBarbers();
-      this.newBarber = { nome: '', cognome: '', esperienza: '', specialita: '' };
-    });
-  }
-
-  deleteBarber(id: number | undefined): void {
-    if (id) {
-      this.apiService.deleteBarber(id).subscribe(() => this.loadBarbers());
     }
   }
 }

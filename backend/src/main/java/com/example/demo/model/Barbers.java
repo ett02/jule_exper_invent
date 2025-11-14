@@ -25,7 +25,7 @@ public class Barbers {
     private String esperienza;
 
     @Column(name = "specialità")  // Nome colonna DB con accento
-    private String specialita;    // Property Java senza accento
+    private String specialita; // Nome senza accentoento)
 
     private Boolean isActive;
 
