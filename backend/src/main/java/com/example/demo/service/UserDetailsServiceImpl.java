@@ -21,10 +21,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
         
         // IMPORTANTE: La password deve essere hashata nel DB
-       return User.builder()
+        return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword()) // Password hashata da DB
-                .authorities(user.getRuolo().toString()) // <-- MODIFICA: da .roles() a .authorities()
+                .authorities(user.getRuolo().toString()) // <-- MODIFICA CHIAVE
                 .build();
     }
 
