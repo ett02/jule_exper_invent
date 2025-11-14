@@ -19,10 +19,10 @@ public class BarberServices {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "barbiere_id")
-    private Barbers barbiere;
+    @JoinColumn(name = "barbiere_id", nullable = false)
+    private Barbers barber;
 
     @ManyToOne
-    @JoinColumn(name = "servizio_id")
-    private Services servizio;
+    @JoinColumn(name = "servizio_id", nullable = false)
+    private Services service;
 }

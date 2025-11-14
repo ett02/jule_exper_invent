@@ -1,10 +1,6 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -18,9 +14,9 @@ public class Services {
 
     private String nome;
 
-    private int durata;
+    private Integer durata; // in minuti
 
-    private float prezzo;
+    private Float prezzo;
 
     private String descrizione;
 }

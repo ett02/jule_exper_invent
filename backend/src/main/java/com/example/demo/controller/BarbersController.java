@@ -1,18 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.BarberServices;
+import com.example.demo.dto.BarberAvailabilityRequest;
+import com.example.demo.dto.BarberServiceRequest;
 import com.example.demo.model.Barbers;
+import com.example.demo.model.Availability;
+import com.example.demo.model.BarberServices;
 import com.example.demo.service.BarbersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,28 +20,65 @@ public class BarbersController {
     @Autowired
     private BarbersService barbersService;
 
-    @PostMapping
-    public Barbers createBarber(@RequestBody @NonNull Barbers barber) {
-        return barbersService.createBarber(barber);
-    }
-
     @GetMapping
     public List<Barbers> getAllBarbers() {
         return barbersService.getAllBarbers();
     }
 
     @GetMapping("/{id}")
-    public Barbers getBarberById(@PathVariable @NonNull Long id) {
-        return barbersService.getBarberById(id);
+    public ResponseEntity<Barbers> getBarberById(@PathVariable Long id) {
+        return barbersService.getBarberById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{id}/services")
-    public BarberServices assignServiceToBarber(@PathVariable @NonNull Long id, @RequestParam @NonNull Long serviceId) {
-        return barbersService.assignServiceToBarber(id, serviceId);
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping
+    public Barbers createBarber(@RequestBody Barbers barber) {
+        return barbersService.createBarber(barber);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<Barbers> updateBarber(@PathVariable Long id, @RequestBody Barbers barber) {
+        return ResponseEntity.ok(barbersService.updateBarber(id, barber));
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
-    public void deleteBarber(@PathVariable @NonNull Long id) {
+    public ResponseEntity<Void> deleteBarber(@PathVariable Long id) {
         barbersService.deleteBarber(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/{id}/services")
+    public ResponseEntity<BarberServices> assignServiceToBarber(
+            @PathVariable Long id,
+            @RequestBody BarberServiceRequest request) {
+        return ResponseEntity.ok(barbersService.assignServiceToBarber(id, request.getServiceId()));
+    }
+
+    @GetMapping("/{id}/services")
+    public List<BarberServices> getBarberServices(@PathVariable Long id) {
+        return barbersService.getBarberServices(id);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/{id}/availability")
+    public ResponseEntity<Availability> addBarberAvailability(
+            @PathVariable Long id,
+            @RequestBody BarberAvailabilityRequest request) {
+        return ResponseEntity.ok(barbersService.addAvailability(id, request));
+    }
+
+    @GetMapping("/{id}/availability")
+    public List<Availability> getBarberAvailability(@PathVariable Long id) {
+        return barbersService.getBarberAvailability(id);
+    }
+
+    @GetMapping("/service/{serviceId}")
+    public List<Barbers> getBarbersByService(@PathVariable Long serviceId) {
+        return barbersService.getBarbersByService(serviceId);
     }
 }

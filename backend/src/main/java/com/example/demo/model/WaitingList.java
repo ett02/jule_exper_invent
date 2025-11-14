@@ -3,12 +3,12 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "appointments")
-public class Appointments {
+@Table(name = "waiting_list")
+public class WaitingList {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,16 +26,18 @@ public class Appointments {
     @JoinColumn(name = "service_id", nullable = false)
     private Services service;
 
-    private LocalDate data;
+    private LocalDate dataRichiesta;
 
-    private LocalTime orarioInizio;
+    private LocalDateTime dataIscrizione;
 
     @Enumerated(EnumType.STRING)
-    private StatoAppuntamento stato;
+    private StatoListaAttesa stato;
 
-    public enum StatoAppuntamento {
-        CONFIRMATO,
-        PENDING,
+    public enum StatoListaAttesa {
+        IN_ATTESA,
+        NOTIFICATO,
+        CONFERMATO,
+        SCADUTO,
         ANNULLATO
     }
 }

@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface BarberServicesRepository extends JpaRepository<BarberServices, Long> {
-    List<BarberServices> findByServizioId(Long servizioId);
+    List<BarberServices> findByBarberId(Long barberId);
+    List<BarberServices> findByServiceId(Long serviceId);
 }
