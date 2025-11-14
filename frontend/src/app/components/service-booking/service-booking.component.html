@@ -128,11 +128,11 @@
              *ngFor="let slot of availableSlots" 
              [class.available]="slot.available" 
              [class.unavailable]="!slot.available"
-             [class.selected]="selectedTime === slot.time"
-             (click)="selectTimeSlot(slot)">
+             [class.selected]="selectedTime?.time === slot.time"
+             (click)="selectTime(slot)">
           <span class="slot-time">{{ slot.time }}</span>
           <span class="slot-status" *ngIf="!slot.available">❌</span>
-          <span class="slot-status" *ngIf="slot.available && selectedTime === slot.time">✅</span>
+          <span class="slot-status" *ngIf="slot.available && selectedTime?.time === slot.time">✅</span>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import { AppointmentService } from '../../services/appointment.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// Interfacce per chiarezza
+// Interfacce (Barber e Service sono invariate)
 interface Barber {
   id: number;
   nome: string;
@@ -23,18 +23,19 @@ interface Service {
   descrizione: string;
 }
 
-// --- (Aggiunta 1) ---
-// Interfaccia per i giorni del calendario
+// --- (Correzione 1: Interfaccia CalendarDay) ---
+// Aggiornata per corrispondere alle proprietà usate nell'HTML
 interface CalendarDay {
-  day: number | null; // null per i giorni vuoti all'inizio/fine mese
+  number: number | null; // Per {{ day.number }}
+  isEmpty: boolean;      // Per [class.empty] e *ngIf="!day.isEmpty"
   isToday: boolean;
+  selected: boolean;     // Per [class.selected]
+  available: boolean;    // Per [class.available]
 }
 
-// --- (Aggiunta 2) ---
-// Interfaccia per gli slot come atteso dall'HTML
 interface TimeSlot {
-  time: string;       // Era 'orario'
-  available: boolean; // Era 'disponibile'
+  time: string;
+  available: boolean;
 }
 
 @Component({
@@ -49,26 +50,21 @@ export class ServiceBookingComponent implements OnInit {
   selectedService: Service | null = null;
   selectedBarber: Barber | null = null;
   selectedDate: string | null = null;
-  
-  // --- (Correzione 1) ---
-  // Rinominato da 'selectedTimeSlot' a 'selectedTime'
-  // e tipo aggiornato a TimeSlot
   selectedTime: TimeSlot | null = null;
 
   services: Service[] = [];
   barbers: Barber[] = [];
-
-  // --- (Correzione 2) ---
-  // Tipo aggiornato per usare TimeSlot
   availableSlots: TimeSlot[] = [];
 
   currentMonth: Date = new Date();
-
-  // --- (Correzione 3) ---
-  // Proprietà aggiunte per il calendario HTML
+  
+  // Proprietà per il calendario
   currentMonthDisplay: string = '';
   weekDays: string[] = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
-  calendarDays: CalendarDay[] = []; // Sostituisce 'monthDays'
+  
+  // --- (Correzione 1) ---
+  // Tipo aggiornato a CalendarDay[]
+  calendarDays: CalendarDay[] = [];
 
   constructor(
     private apiService: ApiService,
@@ -79,11 +75,9 @@ export class ServiceBookingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // --- (Correzione 4) ---
-    // Chiamiamo la nuova funzione per costruire il calendario
-    this.buildCalendar();
+    this.buildCalendar(); // Chiamata alla funzione aggiornata
 
-    // Logica di caricamento servizi (corretta nella versione precedente)
+    // Logica di caricamento servizi (invariata)
     this.apiService.getAllServices().subscribe(
       (data) => {
         this.services = data;
@@ -112,7 +106,6 @@ export class ServiceBookingComponent implements OnInit {
 
   loadBarbers(): void {
     if (!this.selectedService) return;
-    // TODO: Sostituire con chiamata API
     this.barbers = [
       { id: 1, nome: 'Marco', cognome: 'Bianchi', esperienza: '10 anni', specialita: 'Taglio classico' },
       { id: 2, nome: 'Luca', cognome: 'Verdi', esperienza: '5 anni', specialita: 'Barba' }
@@ -124,62 +117,85 @@ export class ServiceBookingComponent implements OnInit {
     this.nextStep();
   }
 
-  // --- (Correzione 5) ---
-  // 'buildMonthDays' rinominato e completamente riscritto
-  // per popolare 'calendarDays' e 'currentMonthDisplay'
+  // --- (Correzione 2: Funzione buildCalendar) ---
+  // Aggiornata per popolare la nuova interfaccia CalendarDay
   buildCalendar(): void {
     const y = this.currentMonth.getFullYear();
     const m = this.currentMonth.getMonth();
     
-    // Per 'currentMonthDisplay' (es. "Novembre 2025")
     this.currentMonthDisplay = this.currentMonth.toLocaleDateString('it-IT', {
       month: 'long',
       year: 'numeric'
     });
 
     this.calendarDays = [];
-    const firstDayOfMonth = new Date(y, m, 1).getDay(); // 0=Dom, 1=Lun,...
+    const firstDayOfMonth = new Date(y, m, 1).getDay();
     const daysInMonth = new Date(y, m + 1, 0).getDate();
+    
     const today = new Date();
+    // Imposta l'ora a 0 per confrontare solo le date
+    today.setHours(0, 0, 0, 0); 
 
-    // 1. Aggiungi celle vuote per i giorni prima dell'inizio del mese
+    // 1. Celle vuote
     for (let i = 0; i < firstDayOfMonth; i++) {
-      this.calendarDays.push({ day: null, isToday: false });
+      this.calendarDays.push({
+        number: null,
+        isEmpty: true,
+        isToday: false,
+        selected: false,
+        available: false // Le celle vuote non sono disponibili
+      });
     }
 
-    // 2. Aggiungi i giorni del mese
+    // 2. Giorni del mese
     for (let i = 1; i <= daysInMonth; i++) {
-      const isToday = y === today.getFullYear() && m === today.getMonth() && i === today.getDate();
-      this.calendarDays.push({ day: i, isToday: isToday });
+      const date = new Date(y, m, i);
+      const dateString = `${y}-${String(m + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+      const isToday = date.getTime() === today.getTime();
+      const isPast = date < today; // Controlla se il giorno è nel passato
+
+      this.calendarDays.push({
+        number: i,
+        isEmpty: false,
+        isToday: isToday,
+        selected: dateString === this.selectedDate, // Seleziona se corrisponde
+        available: !isPast // Un giorno non è disponibile se è nel passato
+      });
     }
   }
 
   previousMonth(): void {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
-    this.buildCalendar(); // Aggiorna il calendario
+    this.buildCalendar();
   }
 
   nextMonth(): void {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
-    this.buildCalendar(); // Aggiorna il calendario
+    this.buildCalendar();
   }
 
-  // --- (Correzione 6) ---
-  // 'selectDate' ora accetta un oggetto 'CalendarDay'
+  // --- (Correzione 3: Funzione selectDate) ---
+  // Aggiornata per usare la nuova interfaccia e gestire lo stato 'selected'
   selectDate(dayObj: CalendarDay): void {
-    // Non fare nulla se si clicca su una cella vuota
-    if (dayObj.day === null) {
+    // Non fare nulla se si clicca su un giorno vuoto o non disponibile
+    if (dayObj.isEmpty || !dayObj.available) {
+      console.warn('Giorno non disponibile:', dayObj);
       return;
     }
 
     const y = this.currentMonth.getFullYear();
     const m = this.currentMonth.getMonth() + 1;
-    const dd = String(dayObj.day).padStart(2, '0');
+    const dd = String(dayObj.number).padStart(2, '0');
     const mm = String(m).padStart(2, '0');
     this.selectedDate = `${y}-${mm}-${dd}`;
     
+    // Aggiorna lo stato 'selected' per tutti i giorni nel calendario
+    this.calendarDays.forEach(day => {
+      // Seleziona solo il giorno cliccato
+      day.selected = (day.number === dayObj.number && !day.isEmpty);
+    });
+
     this.loadAvailableSlots();
-    // nextStep() viene chiamato dentro loadAvailableSlots() in caso di successo
   }
 
   loadAvailableSlots(): void {
@@ -193,22 +209,12 @@ export class ServiceBookingComponent implements OnInit {
 
     this.appointmentService.getAvailableSlots(barberId, serviceId, date).subscribe(
       (slots: any[]) => {
-        console.log('Slot ricevuti dal backend:', slots);
+        this.availableSlots = slots.map(slot => ({
+          time: slot.orario,
+          available: slot.disponibile
+        }));
         
-        // --- (Correzione 7) ---
-        // Mappiamo la risposta del backend ({orario, disponibile})
-        // nel formato atteso dall'HTML ({time, available})
-        this.availableSlots = slots.map(slot => {
-          return {
-            time: slot.orario,
-            available: slot.disponibile
-          };
-        });
-        
-        const availableCount = this.availableSlots.filter(s => s.available).length;
-        console.log(`Disponibili: ${availableCount}, Occupati: ${this.availableSlots.length - availableCount}`);
-
-        this.nextStep(); // Vai allo step 4 (orari)
+        this.nextStep(); 
       },
       (error: any) => {
         console.error('Errore caricamento slot:', error);
@@ -218,17 +224,12 @@ export class ServiceBookingComponent implements OnInit {
     );
   }
 
-  // --- (Correzione 8) ---
-  // Rinominato da 'selectTimeSlot' a 'selectTime' e tipo aggiornato
   selectTime(slot: TimeSlot): void {
     if (!slot.available) {
-      console.warn('Tentativo di selezionare slot occupato:', slot);
       alert('Questo orario è già occupato. Seleziona un altro slot.');
       return;
     }
-
-    console.log('Slot selezionato:', slot);
-    this.selectedTime = slot; // Era selectedTimeSlot
+    this.selectedTime = slot;
     this.nextStep();
   }
 
@@ -243,8 +244,6 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   confirmBooking(): void {
-    // --- (Correzione 9) ---
-    // Check aggiornato per usare 'selectedTime'
     if (!this.selectedBarber || !this.selectedService || !this.selectedDate || !this.selectedTime) {
       alert('Completa tutti i campi prima di confermare');
       return;
@@ -262,26 +261,20 @@ export class ServiceBookingComponent implements OnInit {
       barberId: this.selectedBarber.id,
       serviceId: this.selectedService.id,
       data: this.selectedDate,
-      // Usiamo la proprietà 'time' dal nostro oggetto 'selectedTime'
       orarioInizio: this.ensureHHmmss(this.selectedTime.time)
     };
 
-    console.log('Creazione appuntamento:', appointmentData);
-
     this.appointmentService.createAppointment(appointmentData).subscribe(
       (response: any) => {
-        console.log('Prenotazione confermata:', response);
-        
         alert(
           `✅ Prenotazione confermata!\n\n` +
           `Servizio: ${this.selectedService!.nome}\n` +
           `Barbiere: ${this.selectedBarber!.nome} ${this.selectedBarber!.cognome}\n` +
           `Data: ${new Date(this.selectedDate!).toLocaleDateString('it-IT')}\n` +
-          `Orario: ${this.selectedTime!.time}\n` + // Usiamo .time
+          `Orario: ${this.selectedTime!.time}\n` +
           `Durata: ${this.selectedService!.durata} minuti\n` +
           `Prezzo: €${this.selectedService!.prezzo}`
         );
-        
         this.router.navigate(['/customer-dashboard']);
       },
       (error: any) => {
@@ -298,31 +291,20 @@ export class ServiceBookingComponent implements OnInit {
   private ensureHHmmss(time: string): string {
     if (/^\d{2}:\d{2}$/.test(time)) return `${time}:00`;
     if (/^\d{2}:\d{2}:\d{2}$/.test(time)) return time;
-    
     const match = time.match(/^(\d{2}:\d{2})/);
     if (match) {
-      console.warn(`Formato ora non standard: ${time}. Convertito in ${match[1]}:00`);
       return `${match[1]}:00`;
     }
-    
-    console.error(`Formato ora non valido: ${time}. Uso 00:00:00`);
     return '00:00:00';
   }
 
-  // --- (Correzione 10) ---
-  // Aggiunta la funzione 'canProceed' mancante, usata nell'HTML
   canProceed(): boolean {
     switch (this.currentStep) {
-      case 1:
-        return this.selectedService !== null;
-      case 2:
-        return this.selectedBarber !== null;
-      case 3:
-        return this.selectedDate !== null;
-      case 4:
-        return this.selectedTime !== null;
-      default:
-        return false;
+      case 1: return this.selectedService !== null;
+      case 2: return this.selectedBarber !== null;
+      case 3: return this.selectedDate !== null;
+      case 4: return this.selectedTime !== null;
+      default: return false;
     }
   }
 }
