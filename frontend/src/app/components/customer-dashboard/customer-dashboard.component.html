@@ -29,11 +29,7 @@
           <p><strong>Orario:</strong> {{ appointment.time }}</p>
           <p><strong>Durata:</strong> {{ appointment.duration }} min</p>
         </div>
-        <button
-          class="btn btn-secondary btn-cancel"
-          *ngIf="appointment.status === 'CONFIRMATO'"
-          (click)="cancelAppointment(appointment.id)"
-        >
+        <button class="btn btn-secondary btn-cancel" *ngIf="appointment.status === 'CONFERMATO'" (click)="cancelAppointment(appointment.id)">
           ❌ Cancella Appuntamento
         </button>
       </div>
