@@ -40,8 +40,6 @@ public class AppointmentsService {
     @Autowired
     private BusinessHoursRepository businessHoursRepository;
 
-    private static final int SLOT_INTERVAL_MINUTES = 5;
-
     /**
      * Creates a new appointment.
      *
@@ -216,6 +214,9 @@ public class AppointmentsService {
                 .orElseThrow(() -> new RuntimeException("Servizio non trovato"));
 
         int serviceDuration = service.getDurata();
+        if (serviceDuration <= 0) {
+            return slots;
+        }
 
         LocalTime apertura = businessHours != null ? businessHours.getApertura() : null;
         LocalTime chiusura = businessHours != null ? businessHours.getChiusura() : null;
@@ -244,7 +245,7 @@ public class AppointmentsService {
 
                 slots.add(new AvailableSlotResponse(currentTime, slotEnd, available));
 
-                currentTime = currentTime.plusMinutes(SLOT_INTERVAL_MINUTES);
+                currentTime = currentTime.plusMinutes(serviceDuration);
             }
         }
 

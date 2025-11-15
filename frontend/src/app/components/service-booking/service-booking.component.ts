@@ -154,6 +154,14 @@ export class ServiceBookingComponent implements OnInit {
     }
   }
 
+  handleBack(): void {
+    if (this.currentStep > 1) {
+      this.previousStep();
+    } else {
+      this.router.navigate(['/']);
+    }
+  }
+
   confirmBooking(): void {
     const decodedToken = this.authService.getDecodedToken();
     if (decodedToken && this.selectedBarber && this.selectedService) {
@@ -162,7 +170,7 @@ export class ServiceBookingComponent implements OnInit {
         barberId: this.selectedBarber.id,
         serviceId: this.selectedService.id,
         data: this.selectedDate,
-        orarioInizio: this.selectedTime,
+        orarioInizio: this.formatTimeForApi(this.selectedTime),
       };
 
       this.bookingError = '';
@@ -183,5 +191,9 @@ export class ServiceBookingComponent implements OnInit {
 
   formatTime(time: string): string {
     return time ? time.substring(0, 5) : '';
+  }
+
+  private formatTimeForApi(time: string): string {
+    return time.length === 5 ? `${time}:00` : time;
   }
 }
