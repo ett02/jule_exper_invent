@@ -18,20 +18,20 @@
     <div class="appointments-grid">
       <div class="appointment-card" *ngFor="let appointment of appointments">
         <div class="appointment-header">
-          <span class="service-name">{{ appointment.serviceName }}</span>
-          <span class="status-badge" [class]="'badge-' + appointment.status.toLowerCase()">
-            {{ appointment.status }}
+          <span class="service-name">{{ getServiceName(appointment.service) }}</span>
+          <span class="status-badge" [class]="getAppointmentStatusClass(appointment)">
+            {{ appointment.stato || 'PENDING' }}
           </span>
         </div>
         <div class="appointment-details">
-          <p><strong>Barbiere:</strong> {{ appointment.barberName }}</p>
-          <p><strong>Data:</strong> {{ appointment.date | date: 'dd/MM/yyyy' }}</p>
-          <p><strong>Orario:</strong> {{ appointment.time }}</p>
-          <p><strong>Durata:</strong> {{ appointment.duration }} min</p>
+          <p><strong>Barbiere:</strong> {{ getBarberFullName(appointment.barber) }}</p>
+          <p><strong>Data:</strong> {{ appointment.data | date: 'dd/MM/yyyy' }}</p>
+          <p><strong>Orario:</strong> {{ appointment.orarioInizio }}</p>
+          <p><strong>Durata:</strong> {{ getServiceDuration(appointment.service) }}</p>
         </div>
         <button
           class="btn btn-secondary btn-cancel"
-          *ngIf="appointment.status === 'CONFIRMATO'"
+          *ngIf="appointment.stato === 'CONFERMATO'"
           (click)="cancelAppointment(appointment.id)"
         >
           ❌ Cancella Appuntamento
@@ -54,14 +54,14 @@
   <section class="waiting-list-section" *ngIf="waitingList.length > 0">
     <h2>⏳ Lista d'Attesa</h2>
     <div class="waiting-list-cards">
-      <div class="waiting-card" *ngFor="let waiting of waitingList">
+      <div class="waiting-card" *ngFor="let waiting of waitingList; let i = index">
         <div class="waiting-header">
-          <span class="waiting-service">{{ waiting.serviceName }}</span>
-          <span class="position-badge">Posizione: {{ waiting.position }}</span>
+          <span class="waiting-service">{{ getServiceName(waiting.service) }}</span>
+          <span class="position-badge">Posizione: {{ i + 1 }}</span>
         </div>
-        <p><strong>Barbiere:</strong> {{ waiting.barberName }}</p>
-        <p><strong>Data Richiesta:</strong> {{ waiting.requestedDate | date: 'dd/MM/yyyy' }}</p>
-        <p class="waiting-status">{{ waiting.statusMessage }}</p>
+        <p><strong>Barbiere:</strong> {{ getBarberFullName(waiting.barber) }}</p>
+        <p><strong>Data Richiesta:</strong> {{ waiting.dataRichiesta | date: 'dd/MM/yyyy' }}</p>
+        <p class="waiting-status">{{ getWaitingStatusMessage(waiting) }}</p>
         <button class="btn btn-outline" (click)="removeFromWaitingList(waiting.id)">
           🗑️ Rimuovi dalla Coda
         </button>

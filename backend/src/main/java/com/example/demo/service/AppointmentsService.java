@@ -61,7 +61,7 @@ public class AppointmentsService {
         appointment.setService(service);
         appointment.setData(request.getData());
         appointment.setOrarioInizio(request.getOrarioInizio());
-        appointment.setStato(Appointments.StatoAppuntamento.CONFIRMATO);
+        appointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
 
         return appointmentsRepository.save(appointment);
     }
@@ -235,7 +235,7 @@ public class AppointmentsService {
         LocalTime orarioFine = orarioInizio.plusMinutes(service.getDurata());
 
         List<Appointments> existingAppointments = appointmentsRepository
-                .findByBarberIdAndDataAndStato(barberId, date, Appointments.StatoAppuntamento.CONFIRMATO);
+                .findByBarberIdAndDataAndStato(barberId, date, Appointments.StatoAppuntamento.CONFERMATO);
 
         return existingAppointments.stream().noneMatch(appointment -> {
             LocalTime existingStart = appointment.getOrarioInizio();

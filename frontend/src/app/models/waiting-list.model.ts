@@ -9,5 +9,5 @@ export interface WaitingList {
     service: Service;
     dataRichiesta: Date;
     dataIscrizione: Date;
-    stato: 'IN_ATTESA' | 'CONFERMATO' | 'ANNULLATO';
+    stato: 'IN_ATTESA' | 'NOTIFICATO' | 'CONFERMATO' | 'SCADUTO' | 'ANNULLATO';
 }
