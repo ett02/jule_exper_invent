@@ -1,10 +1,11 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import java.time.LocalTime;
@@ -18,8 +19,9 @@ public class Availability {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "barbiere_id")
-    private Long barbiereId;  // Deve chiamarsi così
+    @ManyToOne
+    @JoinColumn(name = "barbiere_id", nullable = false)
+    private Barbers barber;
 
     private Integer giorno; // 0=Domenica, 1=Lunedì, ..., 6=Sabato
 
