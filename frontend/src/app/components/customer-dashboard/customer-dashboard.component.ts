@@ -43,6 +43,10 @@ export class CustomerDashboardComponent implements OnInit {
     const decodedToken = this.authService.getDecodedToken();
     if (decodedToken) {
       const userId = decodedToken.id;
+      if (typeof userId !== 'number') {
+        console.error('User ID is missing in the decoded token.');
+        return;
+      }
       this.apiService.getAppointmentsByUserId(userId).subscribe(
         (data) => {
           this.appointments = data;
@@ -58,6 +62,10 @@ export class CustomerDashboardComponent implements OnInit {
     const decodedToken = this.authService.getDecodedToken();
     if (decodedToken) {
       const userId = decodedToken.id;
+      if (typeof userId !== 'number') {
+        console.error('User ID is missing in the decoded token.');
+        return;
+      }
       this.apiService.getWaitingListByCustomerId(userId).subscribe(
         (data) => {
           this.waitingList = data;

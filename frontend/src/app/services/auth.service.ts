@@ -114,10 +114,6 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.roleKey);
     localStorage.removeItem(this.userIdKey);
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
     localStorage.removeItem('user');
   }
 }
