@@ -237,6 +237,28 @@ export class AdminDashboardComponent implements OnInit {
     return this.formatTimeValue(time);
   }
 
+  getAppointmentStatusClass(status: string | undefined): string {
+    const normalized = (status || '').toLowerCase();
+
+    if (normalized.includes('confer')) {
+      return 'status-confirmed';
+    }
+
+    if (normalized.includes('complet')) {
+      return 'status-completed';
+    }
+
+    if (normalized.includes('annull') || normalized.includes('cancel')) {
+      return 'status-cancelled';
+    }
+
+    if (normalized.includes('pend') || normalized.includes('attesa')) {
+      return 'status-pending';
+    }
+
+    return 'status-default';
+  }
+
   loadBusinessHours(): void {
     this.apiService.getBusinessHours().subscribe({
       next: (data) => {
