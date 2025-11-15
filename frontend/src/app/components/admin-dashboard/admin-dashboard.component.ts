@@ -6,6 +6,9 @@ import { Service } from '../../models/service.model';
 import { Barber } from '../../models/barber.model';
 import { Appointment } from '../../models/appointment.model';
 import { BusinessHours } from '../../models/business-hours.model';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 type AdminSection = 'services' | 'barbers' | 'agenda' | 'settings';
 
@@ -18,6 +21,8 @@ type AdminSection = 'services' | 'barbers' | 'agenda' | 'settings';
 })
 export class AdminDashboardComponent implements OnInit {
   private apiService = inject(ApiService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   services: Service[] = [];
   barbers: Barber[] = [];
@@ -59,6 +64,11 @@ export class AdminDashboardComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    if (!this.authService.isAdminAuthenticated()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.loadServices();
     this.loadBarbers();
     this.loadBusinessHours();
@@ -206,7 +216,12 @@ export class AdminDashboardComponent implements OnInit {
           return timeA.localeCompare(timeB);
         });
       },
-      error: (error) => console.error('Errore durante il caricamento degli appuntamenti:', error),
+      error: (error) => {
+        if (this.handleUnauthorized(error)) {
+          return;
+        }
+        console.error('Errore durante il caricamento degli appuntamenti:', error);
+      },
     });
   }
 
@@ -233,7 +248,12 @@ export class AdminDashboardComponent implements OnInit {
             chiusura: hour.chiusura ? hour.chiusura.substring(0, 5) : null,
           }));
       },
-      error: (error) => console.error('Errore durante il caricamento degli orari:', error),
+      error: (error) => {
+        if (this.handleUnauthorized(error)) {
+          return;
+        }
+        console.error('Errore durante il caricamento degli orari:', error);
+      },
     });
   }
 
@@ -271,6 +291,11 @@ export class AdminDashboardComponent implements OnInit {
         this.isSavingBusinessHours = false;
       },
       error: (error) => {
+        if (this.handleUnauthorized(error)) {
+          this.businessHoursMessage = 'Sessione scaduta. Effettua di nuovo l\'accesso per modificare gli orari.';
+          this.isSavingBusinessHours = false;
+          return;
+        }
         console.error('Errore durante il salvataggio degli orari:', error);
         this.businessHoursMessage = 'Impossibile aggiornare gli orari. Riprova più tardi.';
         this.isSavingBusinessHours = false;
@@ -287,5 +312,14 @@ export class AdminDashboardComponent implements OnInit {
       return null;
     }
     return time.length === 5 ? `${time}:00` : time;
+  }
+
+  private handleUnauthorized(error: unknown): boolean {
+    if (error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403)) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+      return true;
+    }
+    return false;
   }
 }
