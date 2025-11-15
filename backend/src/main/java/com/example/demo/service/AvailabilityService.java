@@ -18,20 +18,17 @@ public class AvailabilityService {
     @Autowired
     private BarbersRepository barbersRepository;
 
-    public Availability addAvailability(Long barberId, Availability availability) {
-        Barbers barber = barbersRepository.findById(barberId)
-                .orElseThrow(() -> new RuntimeException("Barbiere non trovato"));
-
-        availability.setBarbiereId(barberId); // ← CORRETTO
-
+    public Availability createAvailability(Long barberId, Availability availability) {
+        Barbers barber = barbersRepository.findById(barberId).orElseThrow();
+        availability.setBarber(barber); // CAMBIATO da setBarbiere a setBarber
         return availabilityRepository.save(availability);
-    }
-
-    public List<Availability> getBarberAvailability(Long barberId) {
-        return availabilityRepository.findByBarbiereId(barberId);
     }
 
     public List<Availability> getAllAvailability() {
         return availabilityRepository.findAll();
+    }
+
+    public List<Availability> getAvailabilityByBarber(Long barberId) {
+        return availabilityRepository.findByBarberId(barberId);
     }
 }

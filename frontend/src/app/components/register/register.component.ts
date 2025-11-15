@@ -25,12 +25,8 @@ export class RegisterComponent {
   };
 
   register() {
-    console.log('Registrazione utente:', this.user);
-    
     this.authService.register(this.user).subscribe(
-      (response) => {
-        console.log('Registrazione completata:', response);
-        alert('Registrazione avvenuta con successo! Ora puoi effettuare il login.');
+      () => {
         this.router.navigate(['/login']);
       },
       (error: { status: number; error: { message: string } }) => {

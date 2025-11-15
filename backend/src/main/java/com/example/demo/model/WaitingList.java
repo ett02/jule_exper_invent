@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Data
 @Entity
@@ -33,9 +32,6 @@ public class WaitingList {
 
     @Enumerated(EnumType.STRING)
     private StatoListaAttesa stato;
-
-    @Column(name = "orario_richiesto")
-    private LocalTime orarioRichiesto; // Orario preferito dal cliente (opzionale)
 
     public enum StatoListaAttesa {
         IN_ATTESA,
