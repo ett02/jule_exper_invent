@@ -34,11 +34,11 @@ export class LoginComponent {
           return;
         }
 
-        localStorage.setItem('token', response.jwt);
-        console.log('Token saved to localStorage');
-
-        // Decode the token to get the user's role
-        const decodedToken = this.authService.getDecodedToken();
+        const decodedToken = this.authService.saveSession(response.jwt);
+        if (!decodedToken) {
+          alert('Errore durante il salvataggio della sessione. Effettua nuovamente il login.');
+          return;
+        }
         console.log('Decoded token:', decodedToken);
 
         if (!decodedToken || !decodedToken.role) {
