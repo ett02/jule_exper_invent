@@ -61,7 +61,7 @@ public class AppointmentsService {
         appointment.setService(service);
         appointment.setData(request.getData());
         appointment.setOrarioInizio(request.getOrarioInizio());
-        appointment.setStato(Appointments.StatoAppuntamento.CONFIRMATO);
+        appointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
 
         return appointmentsRepository.save(appointment);
     }
