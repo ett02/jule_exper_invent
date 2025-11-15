@@ -135,4 +135,9 @@ export class CustomerDashboardComponent implements OnInit {
         return 'Stato non disponibile';
     }
   }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }
