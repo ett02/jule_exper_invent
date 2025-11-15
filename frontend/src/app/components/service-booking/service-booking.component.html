@@ -82,17 +82,75 @@
   <!-- Step 3: Selezione Data -->
   <div class="booking-step" *ngIf="currentStep === 3">
     <h2>Scegli la Data</h2>
+    <p class="calendar-subtitle">Scegli un giorno disponibile per continuare la prenotazione.</p>
     <div class="calendar-container">
-      <div class="calendar-wrapper">
-        <label for="date-input" class="calendar-label">📅 Seleziona una data</label>
-        <input
-          type="date"
-          id="date-input"
-          class="date-picker"
-          [(ngModel)]="selectedDate"
-          (change)="onDateChange()"
-          [min]="minDate"
-        />
+      <div class="calendar-feedback" *ngIf="isLoadingBusinessHours">
+        Caricamento orari disponibili...
+      </div>
+
+      <div class="calendar-feedback error" *ngIf="!isLoadingBusinessHours && businessHoursError">
+        {{ businessHoursError }}
+      </div>
+
+      <div
+        class="calendar-feedback"
+        *ngIf="!isLoadingBusinessHours && !businessHoursError && calendarMonths.length === 0"
+      >
+        Nessun orario disponibile. Contatta il salone per maggiori informazioni.
+      </div>
+
+      <div
+        class="calendar-card"
+        *ngIf="!isLoadingBusinessHours && !businessHoursError && calendarMonths.length > 0"
+      >
+        <div class="calendar-header">
+          <button
+            type="button"
+            class="calendar-nav"
+            (click)="previousMonth()"
+            [disabled]="activeMonthIndex === 0"
+          >
+            ‹
+          </button>
+          <div class="calendar-month-info">
+            <h3>{{ calendarMonths[activeMonthIndex]?.label }}</h3>
+            <p>Seleziona il giorno desiderato</p>
+          </div>
+          <button
+            type="button"
+            class="calendar-nav"
+            (click)="nextMonth()"
+            [disabled]="activeMonthIndex === calendarMonths.length - 1"
+          >
+            ›
+          </button>
+        </div>
+
+        <div class="calendar-grid" *ngIf="calendarMonths[activeMonthIndex] as activeMonth">
+          <div class="calendar-weekday" *ngFor="let weekday of weekdayLabels">{{ weekday }}</div>
+          <ng-container *ngFor="let day of activeMonth.days">
+            <div class="calendar-day placeholder" *ngIf="day.isPlaceholder"></div>
+            <button
+              *ngIf="!day.isPlaceholder"
+              type="button"
+              class="calendar-day"
+              [class.disabled]="day.isDisabled"
+              [class.closed]="day.isClosed"
+              [class.today]="day.isToday"
+              [class.selected]="day.isSelected"
+              (click)="selectCalendarDay(day)"
+            >
+              <span class="day-number">{{ day.label }}</span>
+              <span class="day-badge" *ngIf="day.isClosed">Chiuso</span>
+            </button>
+          </ng-container>
+        </div>
+
+        <div class="calendar-legend">
+          <span><span class="legend-dot available"></span>Disponibile</span>
+          <span><span class="legend-dot closed"></span>Chiuso</span>
+          <span><span class="legend-dot disabled"></span>Non selezionabile</span>
+        </div>
       </div>
     </div>
   </div>
