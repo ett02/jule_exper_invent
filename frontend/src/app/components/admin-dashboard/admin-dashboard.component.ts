@@ -254,8 +254,8 @@ export class AdminDashboardComponent implements OnInit {
 
     const payload = this.businessHours.map((hour) => ({
       ...hour,
-      apertura: hour.aperto ? hour.apertura : null,
-      chiusura: hour.aperto ? hour.chiusura : null,
+      apertura: hour.aperto ? this.formatTimeForApi(hour.apertura) : null,
+      chiusura: hour.aperto ? this.formatTimeForApi(hour.chiusura) : null,
     }));
 
     this.apiService.updateBusinessHours(payload).subscribe({
@@ -280,5 +280,12 @@ export class AdminDashboardComponent implements OnInit {
 
   getDayName(day: number): string {
     return this.dayNames[day] || '';
+  }
+
+  private formatTimeForApi(time: string | null): string | null {
+    if (!time) {
+      return null;
+    }
+    return time.length === 5 ? `${time}:00` : time;
   }
 }

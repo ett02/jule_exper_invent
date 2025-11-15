@@ -132,7 +132,13 @@
   <!-- Riepilogo e Conferma -->
   <div
     class="booking-summary"
-    *ngIf="selectedService && selectedBarber && selectedDate && selectedTime"
+    *ngIf="
+      currentStep === 4 &&
+      selectedService &&
+      selectedBarber &&
+      selectedDate &&
+      selectedTime
+    "
   >
     <div class="summary-card">
       <h3>📋 Riepilogo Prenotazione</h3>
@@ -171,8 +177,8 @@
 
   <!-- Navigation Buttons -->
   <div class="navigation-buttons">
-    <button class="btn btn-secondary" *ngIf="currentStep > 1" (click)="previousStep()">
-      ← Indietro
+    <button class="btn btn-secondary" (click)="handleBack()">
+      ← {{ currentStep === 1 ? 'Torna alla home' : 'Indietro' }}
     </button>
     <button class="btn btn-primary" *ngIf="currentStep < 4 && canProceed()" (click)="nextStep()">
       Avanti →
