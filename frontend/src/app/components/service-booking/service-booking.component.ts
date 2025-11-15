@@ -61,37 +61,14 @@ export class ServiceBookingComponent implements OnInit {
 
   loadBarbers(): void {
     if (this.selectedService) {
-      // TODO: Call API GET /barbers/service/{serviceId}
-      // Mock data for now
-      this.barbers = [
-        {
-          id: 1,
-          nome: 'Marco',
-          cognome: 'Bianchi',
-          esperienza: '8 anni',
-          specialita: 'Tagli classici e moderni',
-          is_active: true,
-          user_id: 1,
+      this.apiService.getBarbersForService(this.selectedService.id).subscribe(
+        (data) => {
+          this.barbers = data;
         },
-        {
-          id: 2,
-          nome: 'Luca',
-          cognome: 'Verdi',
-          esperienza: '5 anni',
-          specialita: 'Specialista barba',
-          is_active: true,
-          user_id: 2,
+        (error) => {
+          console.error('Error loading barbers for service:', error);
         },
-        {
-          id: 3,
-          nome: 'Giuseppe',
-          cognome: 'Neri',
-          esperienza: '10 anni',
-          specialita: 'Tagli moderni e sfumature',
-          is_active: true,
-          user_id: 3,
-        },
-      ];
+      );
     }
   }
 

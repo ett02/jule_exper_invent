@@ -43,7 +43,7 @@ export class ApiService {
 
   // Customer facing methods
   getBarbersForService(serviceId: number): Observable<Barber[]> {
-    return this.http.get<Barber[]>(`${this.apiUrl}/services/${serviceId}/barbers`);
+    return this.http.get<Barber[]>(`${this.apiUrl}/barbers/service/${serviceId}`);
   }
 
   getBarberAvailability(barberId: number): Observable<Availability[]> {
