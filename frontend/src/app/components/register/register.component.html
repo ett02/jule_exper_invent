@@ -1,48 +1,25 @@
 <div class="register-container">
-  <div class="register-card">
-    <div class="register-header">
-      <h1>Registrazione</h1>
-      <p class="subtitle">Crea il tuo account per prenotare</p>
-    </div>
-
-    <form (ngSubmit)="register()" #registerForm="ngForm">
-      <!-- Nome -->
+  <div class="register-form">
+    <h2>Registrazione</h2>
+    <form (ngSubmit)="register()">
       <div class="form-group">
         <label for="nome">Nome</label>
         <input type="text" id="nome" [(ngModel)]="user.nome" name="nome" required />
       </div>
-
-      <!-- Cognome -->
       <div class="form-group">
         <label for="cognome">Cognome</label>
         <input type="text" id="cognome" [(ngModel)]="user.cognome" name="cognome" required />
       </div>
-
-      <!-- Email -->
       <div class="form-group">
         <label for="email">Email</label>
         <input type="email" id="email" [(ngModel)]="user.email" name="email" required />
       </div>
-
-      <!-- Password -->
       <div class="form-group">
         <label for="password">Password</label>
         <input type="password" id="password" [(ngModel)]="user.password" name="password" required />
       </div>
-
-      <!-- Bottone Registrazione -->
-      <button 
-        type="submit" 
-        class="btn btn-primary btn-register"
-        [disabled]="registerForm.invalid"
-      >
-        ✅ Registrati
-      </button>
+      <button type="submit">Registrati</button>
+      <a routerLink="/login">Hai già un account? Accedi</a>
     </form>
-
-    <!-- Link al Login -->
-    <div class="login-link">
-      <p>Hai già un account? <a routerLink="/login">Accedi</a></p>
-    </div>
   </div>
 </div>
