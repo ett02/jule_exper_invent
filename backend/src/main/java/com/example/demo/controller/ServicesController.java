@@ -6,13 +6,8 @@ import com.example.demo.service.BarbersService;
 import com.example.demo.service.ServicesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,6 +34,11 @@ public class ServicesController {
     @GetMapping("/{id}")
     public Services getServiceById(@PathVariable @NonNull Long id) {
         return servicesService.getServiceById(id).orElse(null);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Services> updateService(@PathVariable Long id, @RequestBody Services service) {
+        return ResponseEntity.ok(servicesService.updateService(id, service));
     }
 
     @DeleteMapping("/{id}")

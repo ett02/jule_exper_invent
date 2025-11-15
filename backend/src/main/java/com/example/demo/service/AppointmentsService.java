@@ -37,6 +37,9 @@ public class AppointmentsService {
     @Autowired
     private WaitingListRepository waitingListRepository;
 
+    @Autowired
+    private BusinessHoursRepository businessHoursRepository;
+
     private static final int SLOT_INTERVAL_MINUTES = 5;
 
     /**
@@ -198,6 +201,11 @@ public class AppointmentsService {
 
         int dayOfWeek = date.getDayOfWeek().getValue() % 7;
 
+        BusinessHours businessHours = businessHoursRepository.findByGiorno(dayOfWeek).orElse(null);
+        if (businessHours != null && !businessHours.isAperto()) {
+            return slots;
+        }
+
         List<Availability> availabilities = availabilityRepository.findByBarberIdAndGiorno(barberId, dayOfWeek);
 
         if (availabilities.isEmpty()) {
@@ -209,13 +217,28 @@ public class AppointmentsService {
 
         int serviceDuration = service.getDurata();
 
+        LocalTime apertura = businessHours != null ? businessHours.getApertura() : null;
+        LocalTime chiusura = businessHours != null ? businessHours.getChiusura() : null;
+
         for (Availability availability : availabilities) {
-            LocalTime currentTime = availability.getOrarioInizio();
-            LocalTime endTime = availability.getOrarioFine();
+            LocalTime effectiveStart = availability.getOrarioInizio();
+            LocalTime effectiveEnd = availability.getOrarioFine();
 
-            while (currentTime.plusMinutes(serviceDuration).isBefore(endTime) ||
-                   currentTime.plusMinutes(serviceDuration).equals(endTime)) {
+            if (apertura != null && effectiveStart.isBefore(apertura)) {
+                effectiveStart = apertura;
+            }
 
+            if (chiusura != null && effectiveEnd.isAfter(chiusura)) {
+                effectiveEnd = chiusura;
+            }
+
+            if (!effectiveStart.isBefore(effectiveEnd)) {
+                continue;
+            }
+
+            LocalTime currentTime = effectiveStart;
+
+            while (!currentTime.plusMinutes(serviceDuration).isAfter(effectiveEnd)) {
                 LocalTime slotEnd = currentTime.plusMinutes(serviceDuration);
                 boolean available = isSlotAvailable(barberId, date, currentTime, serviceId);
 
@@ -234,6 +257,23 @@ public class AppointmentsService {
 
         LocalTime orarioFine = orarioInizio.plusMinutes(service.getDurata());
 
+        int dayOfWeek = date.getDayOfWeek().getValue() % 7;
+        BusinessHours businessHours = businessHoursRepository.findByGiorno(dayOfWeek).orElse(null);
+
+        if (businessHours != null) {
+            if (!businessHours.isAperto()) {
+                return false;
+            }
+
+            if (businessHours.getApertura() != null && orarioInizio.isBefore(businessHours.getApertura())) {
+                return false;
+            }
+
+            if (businessHours.getChiusura() != null && orarioFine.isAfter(businessHours.getChiusura())) {
+                return false;
+            }
+        }
+
         List<Appointments> existingAppointments = appointmentsRepository
                 .findByBarberIdAndDataAndStato(barberId, date, Appointments.StatoAppuntamento.CONFERMATO);
 
@@ -242,5 +282,9 @@ public class AppointmentsService {
             LocalTime existingEnd = existingStart.plusMinutes(appointment.getService().getDurata());
             return orarioInizio.isBefore(existingEnd) && orarioFine.isAfter(existingStart);
         });
+    }
+
+    public List<Appointments> getAppointmentsByDate(LocalDate date) {
+        return appointmentsRepository.findByDataAndStato(date, Appointments.StatoAppuntamento.CONFERMATO);
     }
 }

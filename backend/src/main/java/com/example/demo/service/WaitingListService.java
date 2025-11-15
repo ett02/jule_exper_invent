@@ -1,14 +1,16 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.dto.WaitingListRequest;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +28,9 @@ public class WaitingListService {
 
     @Autowired
     private ServicesRepository servicesRepository;
+
+    @Autowired
+    private AppointmentsRepository appointmentsRepository;
 
     /**
      * Adds a customer to the waiting list.
@@ -75,11 +80,6 @@ public class WaitingListService {
                 barberId, data, WaitingList.StatoListaAttesa.IN_ATTESA);
     }
 
-    /**
-     * Cancels a waiting list entry.
-     *
-     * @param id the waiting list entry id
-     */
     @Transactional
     public void processWaitingListForCancelledAppointment(Long barberId, Long serviceId, LocalDate date) {
         // Trova il primo in coda per questo barbiere/servizio/data
@@ -107,49 +107,7 @@ public class WaitingListService {
             newAppointment.setService(service);
             
             newAppointment.setData(date);
-            newAppointment.setOrarioInizio(waiting.getOrarioRichiesto() != null ? waiting.getOrarioRichiesto() : LocalTime.of(9, 0));
-            newAppointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
-            
-            appointmentsRepository.save(newAppointment);
-            
-            // Aggiorna stato lista d'attesa
-            waiting.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
-            waitingListRepository.save(waiting);
-            
-            System.out.println("✅ Slot assegnato automaticamente a: " + waiting.getCustomer().getEmail());
-        } else {
-            System.out.println("ℹ️ Nessuno in lista d'attesa per questo slot");
-        }
-    }
-
-    @Transactional
-    public void processWaitingListForCancelledAppointment(Long barberId, Long serviceId, LocalDate date) {
-        // Trova il primo in coda per questo barbiere/servizio/data
-        Optional<WaitingList> firstInQueue = waitingListRepository
-                .findFirstByBarberIdAndServiceIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
-                        barberId, serviceId, date, WaitingList.StatoListaAttesa.IN_ATTESA
-                );
-
-        if (firstInQueue.isPresent()) {
-            WaitingList waiting = firstInQueue.get();
-            
-            // Crea appuntamento automatico per il primo in coda
-            Appointments newAppointment = new Appointments();
-            
-            com.example.demo.model.Users customer = new com.example.demo.model.Users();
-            customer.setId(waiting.getCustomer().getId());
-            newAppointment.setCustomer(customer);
-            
-            com.example.demo.model.Barbers barber = new com.example.demo.model.Barbers();
-            barber.setId(barberId);
-            newAppointment.setBarber(barber);
-            
-            Services service = new Services();
-            service.setId(serviceId);
-            newAppointment.setService(service);
-            
-            newAppointment.setData(date);
-            newAppointment.setOrarioInizio(waiting.getOrarioRichiesto() != null ? waiting.getOrarioRichiesto() : LocalTime.of(9, 0));
+            newAppointment.setOrarioInizio(LocalTime.of(9, 0));
             newAppointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
             
             appointmentsRepository.save(newAppointment);
