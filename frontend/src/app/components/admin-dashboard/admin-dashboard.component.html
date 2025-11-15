@@ -279,16 +279,36 @@
         </div>
 
         <div *ngIf="appointments.length > 0; else emptyAppointments" class="appointments-grid">
-          <div class="appointment-card" *ngFor="let appointment of appointments">
-            <div class="appointment-time">{{ formatTime(appointment.orarioInizio) }}</div>
-            <div class="appointment-info">
-              <h4>{{ appointment.service?.nome }}</h4>
-              <p>Cliente: {{ appointment.customer?.nome }} {{ appointment.customer?.cognome }}</p>
-              <p>Barbiere: {{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</p>
-              <p>Durata: {{ appointment.service?.durata }} minuti</p>
+          <article class="appointment-card" *ngFor="let appointment of appointments">
+            <header class="appointment-header">
+              <div class="appointment-time-wrapper">
+                <span class="appointment-time">{{ formatTime(appointment.orarioInizio) }}</span>
+                <span class="appointment-duration" *ngIf="appointment.service?.durata">
+                  ⏱️ {{ appointment.service?.durata }} min
+                </span>
+              </div>
+              <span
+                class="appointment-status"
+                [ngClass]="getAppointmentStatusClass(appointment.stato)"
+              >
+                {{ appointment.stato }}
+              </span>
+            </header>
+
+            <div class="appointment-body">
+              <h4 class="appointment-service">{{ appointment.service?.nome }}</h4>
+              <ul class="appointment-meta">
+                <li class="meta-item">
+                  <span class="meta-icon">🙍</span>
+                  <span>{{ appointment.customer?.nome }} {{ appointment.customer?.cognome }}</span>
+                </li>
+                <li class="meta-item">
+                  <span class="meta-icon">💈</span>
+                  <span>{{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</span>
+                </li>
+              </ul>
             </div>
-            <span class="appointment-status">{{ appointment.stato }}</span>
-          </div>
+          </article>
         </div>
         <ng-template #emptyAppointments>
           <p class="empty-state">Non sono presenti appuntamenti per la data selezionata.</p>
@@ -308,44 +328,47 @@
         </button>
       </div>
 
-      <div class="panel-body">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Giorno</th>
-              <th>Stato</th>
-              <th>Orario di apertura</th>
-              <th>Orario di chiusura</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let hours of businessHours">
-              <td>{{ getDayName(hours.giorno) }}</td>
-              <td>
-                <label class="toggle">
-                  <input type="checkbox" [checked]="hours.aperto" (change)="toggleDayOpen(hours)" />
-                  <span>{{ hours.aperto ? 'Aperto' : 'Chiuso' }}</span>
-                </label>
-              </td>
-              <td>
+      <div class="panel-body hours-body">
+        <div class="business-hours-grid">
+          <div
+            class="business-day-card"
+            *ngFor="let hours of businessHours"
+            [class.closed]="!hours.aperto"
+          >
+            <div class="day-card-header">
+              <div>
+                <h3>{{ getDayName(hours.giorno) }}</h3>
+                <span class="status-pill" [class.open]="hours.aperto" [class.closed]="!hours.aperto">
+                  {{ hours.aperto ? 'Aperto' : 'Chiuso' }}
+                </span>
+              </div>
+              <button type="button" class="btn toggle" (click)="toggleDayOpen(hours)">
+                {{ hours.aperto ? 'Imposta come chiuso' : 'Imposta come aperto' }}
+              </button>
+            </div>
+
+            <div class="day-card-body">
+              <label>
+                Orario di apertura
                 <input
                   type="time"
                   [value]="hours.apertura || ''"
                   (change)="hours.apertura = $event.target.value"
                   [disabled]="!hours.aperto"
                 />
-              </td>
-              <td>
+              </label>
+              <label>
+                Orario di chiusura
                 <input
                   type="time"
                   [value]="hours.chiusura || ''"
                   (change)="hours.chiusura = $event.target.value"
                   [disabled]="!hours.aperto"
                 />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </label>
+            </div>
+          </div>
+        </div>
         <p class="update-message" *ngIf="businessHoursMessage">{{ businessHoursMessage }}</p>
       </div>
     </section>

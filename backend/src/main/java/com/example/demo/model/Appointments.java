@@ -31,6 +31,7 @@ public class Appointments {
     private LocalTime orarioInizio;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "stato", nullable = false, length = 20)
     private StatoAppuntamento stato;
 
     public enum StatoAppuntamento {

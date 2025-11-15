@@ -7,6 +7,24 @@ import { FormsModule } from '@angular/forms';
 import { Service } from '../../models/service.model';
 import { Barber } from '../../models/barber.model';
 import { AvailableSlot } from '../../models/available-slot.model';
+import { BusinessHours } from '../../models/business-hours.model';
+
+interface CalendarDay {
+  isoDate?: string;
+  label?: number;
+  isPlaceholder?: boolean;
+  isToday?: boolean;
+  isSelected?: boolean;
+  isDisabled?: boolean;
+  isClosed?: boolean;
+}
+
+interface CalendarMonth {
+  label: string;
+  month: number;
+  year: number;
+  days: CalendarDay[];
+}
 
 @Component({
   selector: 'app-service-booking',
@@ -24,6 +42,10 @@ export class ServiceBookingComponent implements OnInit {
   services: Service[] = [];
   barbers: Barber[] = [];
   availableSlots: AvailableSlot[] = [];
+  businessHours: BusinessHours[] = [];
+  businessHoursMap = new Map<number, BusinessHours>();
+  calendarMonths: CalendarMonth[] = [];
+  activeMonthIndex = 0;
 
   selectedService: Service | null = null;
   selectedBarber: Barber | null = null;
@@ -33,11 +55,41 @@ export class ServiceBookingComponent implements OnInit {
   minDate = '';
   isLoadingSlots = false;
   bookingError = '';
+  isLoadingBusinessHours = false;
+  businessHoursError = '';
+
+  get isSummaryVisible(): boolean {
+    return (
+      this.currentStep === 4 &&
+      !!this.selectedService &&
+      !!this.selectedBarber &&
+      !!this.selectedDate &&
+      !!this.selectedTime
+    );
+  }
+
+  readonly weekdayLabels = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+  readonly monthLabels = [
+    'Gennaio',
+    'Febbraio',
+    'Marzo',
+    'Aprile',
+    'Maggio',
+    'Giugno',
+    'Luglio',
+    'Agosto',
+    'Settembre',
+    'Ottobre',
+    'Novembre',
+    'Dicembre',
+  ];
 
   ngOnInit(): void {
     // Set minimum date to today
     const today = new Date();
     this.minDate = today.toISOString().split('T')[0];
+
+    this.loadBusinessHours();
 
     // Check if service was passed from customer dashboard
     const navigation = this.router.getCurrentNavigation();
@@ -102,6 +154,8 @@ export class ServiceBookingComponent implements OnInit {
     this.bookingError = '';
     this.currentStep = 2;
     this.loadBarbers();
+    this.activeMonthIndex = 0;
+    this.refreshCalendar();
   }
 
   selectBarber(barber: Barber): void {
@@ -111,12 +165,24 @@ export class ServiceBookingComponent implements OnInit {
     this.availableSlots = [];
     this.bookingError = '';
     this.currentStep = 3;
+    this.activeMonthIndex = 0;
+    this.refreshCalendar();
   }
 
-  onDateChange(): void {
-    this.loadAvailableSlots();
-    this.selectedTime = '';
-    this.bookingError = '';
+  selectCalendarDay(day: CalendarDay): void {
+    if (!day.isoDate || day.isDisabled) {
+      return;
+    }
+
+    if (this.selectedDate !== day.isoDate) {
+      this.selectedDate = day.isoDate;
+      this.selectedTime = '';
+      this.availableSlots = [];
+      this.bookingError = '';
+      this.updateCalendarSelection();
+      this.loadAvailableSlots();
+    }
+
     this.currentStep = 4;
   }
 
@@ -155,11 +221,17 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   handleBack(): void {
+    if (this.isSummaryVisible) {
+      this.selectedTime = '';
+      return;
+    }
+
     if (this.currentStep > 1) {
       this.previousStep();
-    } else {
-      this.router.navigate(['/']);
+      return;
     }
+
+    this.router.navigate(['/customer-dashboard']);
   }
 
   confirmBooking(): void {
@@ -195,5 +267,136 @@ export class ServiceBookingComponent implements OnInit {
 
   private formatTimeForApi(time: string): string {
     return time.length === 5 ? `${time}:00` : time;
+  }
+
+  private loadBusinessHours(): void {
+    this.isLoadingBusinessHours = true;
+    this.businessHoursError = '';
+
+    this.apiService.getBusinessHours().subscribe({
+      next: (data) => {
+        this.businessHours = data;
+        this.businessHoursMap = new Map(data.map((hour) => [hour.giorno, hour]));
+        this.isLoadingBusinessHours = false;
+        this.activeMonthIndex = 0;
+        this.refreshCalendar();
+      },
+      error: (error) => {
+        console.error('Errore durante il caricamento degli orari di apertura:', error);
+        this.businessHoursError =
+          'Impossibile caricare gli orari del salone. Riprova più tardi.';
+        this.isLoadingBusinessHours = false;
+      },
+    });
+  }
+
+  private refreshCalendar(): void {
+    if (!this.businessHours.length || !this.minDate) {
+      this.calendarMonths = [];
+      return;
+    }
+
+    this.generateCalendarMonths();
+    this.updateCalendarSelection();
+  }
+
+  private generateCalendarMonths(monthCount = 3): void {
+    const startDate = this.parseIsoDate(this.minDate);
+    if (!startDate) {
+      this.calendarMonths = [];
+      return;
+    }
+
+    const months: CalendarMonth[] = [];
+
+    for (let offset = 0; offset < monthCount; offset++) {
+      const baseDate = new Date(startDate.getFullYear(), startDate.getMonth() + offset, 1);
+      const totalDays = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0).getDate();
+
+      const days: CalendarDay[] = [];
+      const leadingPlaceholders = this.getMondayBasedWeekday(baseDate);
+      for (let i = 0; i < leadingPlaceholders; i++) {
+        days.push({ isPlaceholder: true });
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const date = new Date(baseDate.getFullYear(), baseDate.getMonth(), day);
+        const isoDate = this.toIsoDate(date);
+        const weekday = date.getDay();
+        const businessHour = this.businessHoursMap.get(weekday);
+        const isClosed = !businessHour || !businessHour.aperto;
+        const isBeforeMin = isoDate < this.minDate;
+
+        days.push({
+          isoDate,
+          label: day,
+          isPlaceholder: false,
+          isToday: isoDate === this.minDate,
+          isSelected: isoDate === this.selectedDate,
+          isDisabled: isBeforeMin || isClosed,
+          isClosed,
+        });
+      }
+
+      months.push({
+        label: `${this.monthLabels[baseDate.getMonth()]} ${baseDate.getFullYear()}`,
+        month: baseDate.getMonth(),
+        year: baseDate.getFullYear(),
+        days,
+      });
+    }
+
+    this.calendarMonths = months;
+
+    if (this.activeMonthIndex >= this.calendarMonths.length) {
+      this.activeMonthIndex = this.calendarMonths.length - 1;
+    }
+    if (this.activeMonthIndex < 0) {
+      this.activeMonthIndex = 0;
+    }
+  }
+
+  previousMonth(): void {
+    if (this.activeMonthIndex > 0) {
+      this.activeMonthIndex--;
+    }
+  }
+
+  nextMonth(): void {
+    if (this.activeMonthIndex < this.calendarMonths.length - 1) {
+      this.activeMonthIndex++;
+    }
+  }
+
+  private updateCalendarSelection(): void {
+    this.calendarMonths = this.calendarMonths.map((month) => ({
+      ...month,
+      days: month.days.map((day) => ({
+        ...day,
+        isSelected: !!day.isoDate && day.isoDate === this.selectedDate,
+      })),
+    }));
+  }
+
+  private parseIsoDate(value: string): Date | null {
+    if (!value) {
+      return null;
+    }
+    const parts = value.split('-').map(Number);
+    if (parts.length !== 3) {
+      return null;
+    }
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  private toIsoDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private getMondayBasedWeekday(date: Date): number {
+    return (date.getDay() + 6) % 7;
   }
 }
