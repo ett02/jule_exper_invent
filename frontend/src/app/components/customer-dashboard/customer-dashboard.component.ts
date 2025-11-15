@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Appointment } from '../../models/appointment.model';
 import { WaitingList } from '../../models/waiting-list.model';
+import { Service } from '../../models/service.model';
+import { Barber } from '../../models/barber.model';
 
 @Component({
   selector: 'app-customer-dashboard',
@@ -94,6 +96,43 @@ export class CustomerDashboardComponent implements OnInit {
           console.error('Error removing from waiting list:', error);
         },
       );
+    }
+  }
+
+  getServiceName(service?: Service | null): string {
+    return service?.nome ?? 'Servizio';
+  }
+
+  getServiceDuration(service?: Service | null): string {
+    return service?.durata != null ? `${service.durata} min` : '--';
+  }
+
+  getAppointmentStatusClass(appointment: Appointment): string {
+    return `badge-${appointment.stato?.toLowerCase() ?? 'pending'}`;
+  }
+
+  getBarberFullName(barber?: Barber | null): string {
+    if (!barber) {
+      return 'Non assegnato';
+    }
+    const parts = [barber.nome, barber.cognome].filter(Boolean);
+    return parts.length > 0 ? parts.join(' ') : 'Non assegnato';
+  }
+
+  getWaitingStatusMessage(waiting: WaitingList): string {
+    switch (waiting.stato) {
+      case 'IN_ATTESA':
+        return 'In attesa di disponibilità';
+      case 'NOTIFICATO':
+        return 'Hai ricevuto una notifica di disponibilità';
+      case 'CONFERMATO':
+        return 'Appuntamento confermato';
+      case 'SCADUTO':
+        return 'La richiesta è scaduta';
+      case 'ANNULLATO':
+        return 'Richiesta annullata';
+      default:
+        return 'Stato non disponibile';
     }
   }
 }
