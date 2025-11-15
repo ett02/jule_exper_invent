@@ -118,6 +118,48 @@ public class WaitingListService {
     }
 
     @Transactional
+    public void processWaitingListForCancelledAppointment(Long barberId, Long serviceId, LocalDate date) {
+        // Trova il primo in coda per questo barbiere/servizio/data
+        Optional<WaitingList> firstInQueue = waitingListRepository
+                .findFirstByBarberIdAndServiceIdAndDataRichiestaAndStatoOrderByDataIscrizioneAsc(
+                        barberId, serviceId, date, WaitingList.StatoListaAttesa.IN_ATTESA
+                );
+
+        if (firstInQueue.isPresent()) {
+            WaitingList waiting = firstInQueue.get();
+            
+            // Crea appuntamento automatico per il primo in coda
+            Appointments newAppointment = new Appointments();
+            
+            com.example.demo.model.Users customer = new com.example.demo.model.Users();
+            customer.setId(waiting.getCustomer().getId());
+            newAppointment.setCustomer(customer);
+            
+            com.example.demo.model.Barbers barber = new com.example.demo.model.Barbers();
+            barber.setId(barberId);
+            newAppointment.setBarber(barber);
+            
+            Services service = new Services();
+            service.setId(serviceId);
+            newAppointment.setService(service);
+            
+            newAppointment.setData(date);
+            newAppointment.setOrarioInizio(waiting.getOrarioRichiesto() != null ? waiting.getOrarioRichiesto() : LocalTime.of(9, 0));
+            newAppointment.setStato(Appointments.StatoAppuntamento.CONFERMATO);
+            
+            appointmentsRepository.save(newAppointment);
+            
+            // Aggiorna stato lista d'attesa
+            waiting.setStato(WaitingList.StatoListaAttesa.CONFERMATO);
+            waitingListRepository.save(waiting);
+            
+            System.out.println("✅ Slot assegnato automaticamente a: " + waiting.getCustomer().getEmail());
+        } else {
+            System.out.println("ℹ️ Nessuno in lista d'attesa per questo slot");
+        }
+    }
+
+    @Transactional
     public void cancelWaitingListEntry(Long id) {
         WaitingList entry = waitingListRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Voce lista d'attesa non trovata"));
