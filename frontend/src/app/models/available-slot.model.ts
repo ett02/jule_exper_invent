@@ -1,4 +1,5 @@
 export interface AvailableSlot {
-    time: string;
-    available: boolean;
+  orarioInizio: string;
+  orarioFine: string;
+  available: boolean;
 }

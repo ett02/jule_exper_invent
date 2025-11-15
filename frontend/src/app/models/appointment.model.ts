@@ -4,10 +4,10 @@ import { Service } from './service.model';
 
 export interface Appointment {
   id: number;
-  customer: User;
-  barber: Barber;
-  service: Service;
-  data: Date;
+  customer?: User;
+  barber?: Barber;
+  service?: Service;
+  data: string | Date;
   orarioInizio: string;
   stato: 'CONFERMATO' | 'PENDING' | 'ANNULLATO';
 }

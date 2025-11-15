@@ -69,4 +69,11 @@ public class AppointmentsController {
     public List<Appointments> getAllAppointments() {
         return appointmentsService.getAllAppointments();
     }
+
+    @GetMapping("/by-date")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<Appointments> getAppointmentsByDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return appointmentsService.getAppointmentsByDate(date);
+    }
 }
