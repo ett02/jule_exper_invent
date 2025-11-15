@@ -279,16 +279,36 @@
         </div>
 
         <div *ngIf="appointments.length > 0; else emptyAppointments" class="appointments-grid">
-          <div class="appointment-card" *ngFor="let appointment of appointments">
-            <div class="appointment-time">{{ formatTime(appointment.orarioInizio) }}</div>
-            <div class="appointment-info">
-              <h4>{{ appointment.service?.nome }}</h4>
-              <p>Cliente: {{ appointment.customer?.nome }} {{ appointment.customer?.cognome }}</p>
-              <p>Barbiere: {{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</p>
-              <p>Durata: {{ appointment.service?.durata }} minuti</p>
+          <article class="appointment-card" *ngFor="let appointment of appointments">
+            <header class="appointment-header">
+              <div class="appointment-time-wrapper">
+                <span class="appointment-time">{{ formatTime(appointment.orarioInizio) }}</span>
+                <span class="appointment-duration" *ngIf="appointment.service?.durata">
+                  ⏱️ {{ appointment.service?.durata }} min
+                </span>
+              </div>
+              <span
+                class="appointment-status"
+                [ngClass]="getAppointmentStatusClass(appointment.stato)"
+              >
+                {{ appointment.stato }}
+              </span>
+            </header>
+
+            <div class="appointment-body">
+              <h4 class="appointment-service">{{ appointment.service?.nome }}</h4>
+              <ul class="appointment-meta">
+                <li class="meta-item">
+                  <span class="meta-icon">🙍</span>
+                  <span>{{ appointment.customer?.nome }} {{ appointment.customer?.cognome }}</span>
+                </li>
+                <li class="meta-item">
+                  <span class="meta-icon">💈</span>
+                  <span>{{ appointment.barber?.nome }} {{ appointment.barber?.cognome }}</span>
+                </li>
+              </ul>
             </div>
-            <span class="appointment-status">{{ appointment.stato }}</span>
-          </div>
+          </article>
         </div>
         <ng-template #emptyAppointments>
           <p class="empty-state">Non sono presenti appuntamenti per la data selezionata.</p>

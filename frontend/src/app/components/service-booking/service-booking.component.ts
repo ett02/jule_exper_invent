@@ -58,6 +58,16 @@ export class ServiceBookingComponent implements OnInit {
   isLoadingBusinessHours = false;
   businessHoursError = '';
 
+  get isSummaryVisible(): boolean {
+    return (
+      this.currentStep === 4 &&
+      !!this.selectedService &&
+      !!this.selectedBarber &&
+      !!this.selectedDate &&
+      !!this.selectedTime
+    );
+  }
+
   readonly weekdayLabels = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
   readonly monthLabels = [
     'Gennaio',
@@ -211,11 +221,17 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   handleBack(): void {
+    if (this.isSummaryVisible) {
+      this.selectedTime = '';
+      return;
+    }
+
     if (this.currentStep > 1) {
       this.previousStep();
-    } else {
-      this.router.navigate(['/']);
+      return;
     }
+
+    this.router.navigate(['/customer-dashboard']);
   }
 
   confirmBooking(): void {
