@@ -6,6 +6,8 @@ import { Barber } from '../models/barber.model';
 import { Appointment } from '../models/appointment.model';
 import { Availability } from '../models/availability.model';
 import { WaitingList } from '../models/waiting-list.model';
+import { BusinessHours } from '../models/business-hours.model';
+import { AvailableSlot } from '../models/available-slot.model';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +26,10 @@ export class ApiService {
     return this.http.post<Service>(`${this.apiUrl}/services`, service);
   }
 
+  updateService(id: number, service: Partial<Service>): Observable<Service> {
+    return this.http.put<Service>(`${this.apiUrl}/services/${id}`, service);
+  }
+
   deleteService(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/services/${id}`);
   }
@@ -37,6 +43,10 @@ export class ApiService {
     return this.http.post<Barber>(`${this.apiUrl}/barbers`, barber);
   }
 
+  updateBarber(id: number, barber: Partial<Barber>): Observable<Barber> {
+    return this.http.put<Barber>(`${this.apiUrl}/barbers/${id}`, barber);
+  }
+
   deleteBarber(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/barbers/${id}`);
   }
@@ -48,6 +58,19 @@ export class ApiService {
 
   getBarberAvailability(barberId: number): Observable<Availability[]> {
     return this.http.get<Availability[]>(`${this.apiUrl}/barbers/${barberId}/availability`);
+  }
+
+  getAvailableSlots(barberId: number, serviceId: number, date: string): Observable<AvailableSlot[]> {
+    return this.http.get<AvailableSlot[]>(
+      `${this.apiUrl}/appointments/available-slots`,
+      {
+        params: {
+          barberId,
+          serviceId,
+          date,
+        },
+      },
+    );
   }
 
   createAppointment(appointment: Partial<Appointment>): Observable<Appointment> {
@@ -68,5 +91,19 @@ export class ApiService {
 
   removeFromWaitingList(waitingId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/waiting-list/${waitingId}`);
+  }
+
+  getAppointmentsByDate(date: string): Observable<Appointment[]> {
+    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/by-date`, {
+      params: { date },
+    });
+  }
+
+  getBusinessHours(): Observable<BusinessHours[]> {
+    return this.http.get<BusinessHours[]>(`${this.apiUrl}/business-hours`);
+  }
+
+  updateBusinessHours(hours: BusinessHours[]): Observable<BusinessHours[]> {
+    return this.http.put<BusinessHours[]>(`${this.apiUrl}/business-hours`, hours);
   }
 }

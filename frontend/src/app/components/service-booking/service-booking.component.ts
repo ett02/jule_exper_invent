@@ -31,6 +31,8 @@ export class ServiceBookingComponent implements OnInit {
   selectedTime = '';
 
   minDate = '';
+  isLoadingSlots = false;
+  bookingError = '';
 
   ngOnInit(): void {
     // Set minimum date to today
@@ -49,66 +51,79 @@ export class ServiceBookingComponent implements OnInit {
   }
 
   loadServices(): void {
-    this.apiService.getAllServices().subscribe(
-      (data) => {
+    this.apiService.getAllServices().subscribe({
+      next: (data) => {
         this.services = data;
       },
-      (error) => {
+      error: (error) => {
         console.error('Error loading services:', error);
       },
-    );
+    });
   }
 
   loadBarbers(): void {
     if (this.selectedService) {
-      this.apiService.getBarbersForService(this.selectedService.id).subscribe(
-        (data) => {
+      this.apiService.getBarbersForService(this.selectedService.id!).subscribe({
+        next: (data) => {
           this.barbers = data;
         },
-        (error) => {
-          console.error('Error loading barbers for service:', error);
+        error: (error) => {
+          console.error('Errore durante il caricamento dei barbieri:', error);
         },
-      );
+      });
     }
   }
 
   loadAvailableSlots(): void {
     if (this.selectedBarber && this.selectedService && this.selectedDate) {
-      // TODO: Call API GET /appointments/available-slots
-      // Mock data for now
-      this.availableSlots = [
-        { time: '09:00', available: true },
-        { time: '09:30', available: true },
-        { time: '10:00', available: false },
-        { time: '10:30', available: true },
-        { time: '11:00', available: true },
-        { time: '11:30', available: false },
-        { time: '14:00', available: true },
-        { time: '14:30', available: true },
-        { time: '15:00', available: true },
-      ];
+      this.isLoadingSlots = true;
+      this.availableSlots = [];
+      this.apiService
+        .getAvailableSlots(this.selectedBarber.id!, this.selectedService.id!, this.selectedDate)
+        .subscribe({
+          next: (data) => {
+            this.availableSlots = data;
+            this.isLoadingSlots = false;
+          },
+          error: (error) => {
+            console.error('Errore durante il caricamento delle disponibilità:', error);
+            this.isLoadingSlots = false;
+          },
+        });
     }
   }
 
   selectService(service: Service): void {
     this.selectedService = service;
-    this.nextStep();
+    this.selectedBarber = null;
+    this.selectedDate = '';
+    this.selectedTime = '';
+    this.availableSlots = [];
+    this.bookingError = '';
+    this.currentStep = 2;
     this.loadBarbers();
   }
 
   selectBarber(barber: Barber): void {
     this.selectedBarber = barber;
-    this.nextStep();
+    this.selectedDate = '';
+    this.selectedTime = '';
+    this.availableSlots = [];
+    this.bookingError = '';
+    this.currentStep = 3;
   }
 
   onDateChange(): void {
     this.loadAvailableSlots();
-    this.nextStep();
+    this.selectedTime = '';
+    this.bookingError = '';
+    this.currentStep = 4;
   }
 
   selectTimeSlot(slot: AvailableSlot): void {
     if (slot.available) {
-      this.selectedTime = slot.time;
+      this.selectedTime = this.formatTime(slot.orarioInizio);
+      this.bookingError = '';
     }
   }
 
@@ -150,10 +165,23 @@ export class ServiceBookingComponent implements OnInit {
         orarioInizio: this.selectedTime,
       };
 
-      console.log('Creazione appuntamento:', appointmentData);
-      // TODO: Call API POST /appointments
-      alert('Prenotazione confermata! (TODO: Implementare chiamata API)');
-      this.router.navigate(['/customer-dashboard']);
+      this.bookingError = '';
+
+      this.apiService.createAppointment(appointmentData).subscribe({
+        next: () => {
+          alert('Prenotazione confermata!');
+          this.router.navigate(['/customer-dashboard']);
+        },
+        error: (error) => {
+          console.error('Errore durante la creazione della prenotazione:', error);
+          this.bookingError =
+            error?.error?.message || 'Si è verificato un errore durante la conferma della prenotazione.';
+        },
+      });
     }
+  }
+
+  formatTime(time: string): string {
+    return time ? time.substring(0, 5) : '';
   }
 }

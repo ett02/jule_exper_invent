@@ -29,7 +29,7 @@
   </div>
 
   <!-- Step 1: Selezione Servizio -->
-  <div class="booking-step" *ngIf="currentStep === 1 && !selectedService">
+  <div class="booking-step" *ngIf="currentStep === 1">
     <h2>Scegli il Servizio</h2>
     <div class="services-grid">
       <div
@@ -37,6 +37,7 @@
         *ngFor="let service of services"
         (click)="selectService(service)"
         (keyup.enter)="selectService(service)"
+        [class.selected]="selectedService?.id === service.id"
         tabindex="0"
       >
         <div class="service-icon">✂️</div>
@@ -53,6 +54,9 @@
   <!-- Step 2: Selezione Barbiere -->
   <div class="booking-step" *ngIf="currentStep === 2">
     <h2>Scegli il Barbiere</h2>
+    <div class="no-slots" *ngIf="barbers.length === 0">
+      Nessun barbiere disponibile per questo servizio.
+    </div>
     <div class="barbers-grid">
       <div
         class="barber-card"
@@ -97,21 +101,29 @@
   <div class="booking-step" *ngIf="currentStep === 4">
     <h2>Scegli l'Orario</h2>
     <p class="orario-subtitle">Seleziona uno slot disponibile</p>
-    <div class="time-slots-container">
+    <div class="loading" *ngIf="isLoadingSlots">Caricamento disponibilità...</div>
+    <div class="no-slots" *ngIf="!isLoadingSlots && availableSlots.length === 0">
+      Nessuno slot disponibile per la data selezionata.
+    </div>
+    <div class="time-slots-container" *ngIf="availableSlots.length > 0">
       <div class="time-slots-grid">
         <div
           class="time-slot"
           *ngFor="let slot of availableSlots"
           [class.available]="slot.available"
           [class.unavailable]="!slot.available"
-          [class.selected]="selectedTime === slot.time"
+          [class.selected]="selectedTime === formatTime(slot.orarioInizio)"
           (click)="selectTimeSlot(slot)"
           (keyup.enter)="selectTimeSlot(slot)"
           tabindex="0"
         >
-          <span class="slot-time">{{ slot.time }}</span>
+          <span class="slot-time">{{ formatTime(slot.orarioInizio) }}</span>
           <span class="slot-status" *ngIf="!slot.available">❌</span>
-          <span class="slot-status" *ngIf="slot.available && selectedTime === slot.time">✅</span>
+          <span
+            class="slot-status"
+            *ngIf="slot.available && selectedTime === formatTime(slot.orarioInizio)"
+            >✅</span
+          >
         </div>
       </div>
     </div>
@@ -153,6 +165,7 @@
       <button class="btn btn-primary btn-confirm" (click)="confirmBooking()">
         ✅ Conferma Prenotazione
       </button>
+      <p class="booking-error" *ngIf="bookingError">{{ bookingError }}</p>
     </div>
   </div>
 
