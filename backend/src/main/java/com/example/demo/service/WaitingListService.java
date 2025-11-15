@@ -75,6 +75,11 @@ public class WaitingListService {
                 barberId, data, WaitingList.StatoListaAttesa.IN_ATTESA);
     }
 
+    /**
+     * Cancels a waiting list entry.
+     *
+     * @param id the waiting list entry id
+     */
     @Transactional
     public void processWaitingListForCancelledAppointment(Long barberId, Long serviceId, LocalDate date) {
         // Trova il primo in coda per questo barbiere/servizio/data
