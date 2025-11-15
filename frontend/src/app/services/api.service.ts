@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Service } from '../models/service.model';
 import { Barber } from '../models/barber.model';
@@ -17,21 +17,34 @@ export class ApiService {
 
   private apiUrl = 'http://localhost:8080';
 
+  private getAuthOptions(): { headers?: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return {};
+    }
+
+    return {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token}`,
+      }),
+    };
+  }
+
   // Service management
   getAllServices(): Observable<Service[]> {
     return this.http.get<Service[]>(`${this.apiUrl}/services`);
   }
 
   createService(service: Partial<Service>): Observable<Service> {
-    return this.http.post<Service>(`${this.apiUrl}/services`, service);
+    return this.http.post<Service>(`${this.apiUrl}/services`, service, this.getAuthOptions());
   }
 
   updateService(id: number, service: Partial<Service>): Observable<Service> {
-    return this.http.put<Service>(`${this.apiUrl}/services/${id}`, service);
+    return this.http.put<Service>(`${this.apiUrl}/services/${id}`, service, this.getAuthOptions());
   }
 
   deleteService(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/services/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/services/${id}`, this.getAuthOptions());
   }
 
   // Barber management
@@ -40,15 +53,15 @@ export class ApiService {
   }
 
   createBarber(barber: Partial<Barber>): Observable<Barber> {
-    return this.http.post<Barber>(`${this.apiUrl}/barbers`, barber);
+    return this.http.post<Barber>(`${this.apiUrl}/barbers`, barber, this.getAuthOptions());
   }
 
   updateBarber(id: number, barber: Partial<Barber>): Observable<Barber> {
-    return this.http.put<Barber>(`${this.apiUrl}/barbers/${id}`, barber);
+    return this.http.put<Barber>(`${this.apiUrl}/barbers/${id}`, barber, this.getAuthOptions());
   }
 
   deleteBarber(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/barbers/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/barbers/${id}`, this.getAuthOptions());
   }
 
   // Customer facing methods
@@ -74,36 +87,37 @@ export class ApiService {
   }
 
   createAppointment(appointment: Partial<Appointment>): Observable<Appointment> {
-    return this.http.post<Appointment>(`${this.apiUrl}/appointments`, appointment);
+    return this.http.post<Appointment>(`${this.apiUrl}/appointments`, appointment, this.getAuthOptions());
   }
 
   getAppointmentsByUserId(userId: number): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/user/${userId}`);
+    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/user/${userId}`, this.getAuthOptions());
   }
 
   getWaitingListByCustomerId(customerId: number): Observable<WaitingList[]> {
-    return this.http.get<WaitingList[]>(`${this.apiUrl}/waiting-list/customer/${customerId}`);
+    return this.http.get<WaitingList[]>(`${this.apiUrl}/waiting-list/customer/${customerId}`, this.getAuthOptions());
   }
 
   cancelAppointment(appointmentId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/appointments/${appointmentId}`);
+    return this.http.delete<void>(`${this.apiUrl}/appointments/${appointmentId}`, this.getAuthOptions());
   }
 
   removeFromWaitingList(waitingId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/waiting-list/${waitingId}`);
+    return this.http.delete<void>(`${this.apiUrl}/waiting-list/${waitingId}`, this.getAuthOptions());
   }
 
   getAppointmentsByDate(date: string): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/by-date`, {
       params: { date },
+      ...this.getAuthOptions(),
     });
   }
 
   getBusinessHours(): Observable<BusinessHours[]> {
-    return this.http.get<BusinessHours[]>(`${this.apiUrl}/business-hours`);
+    return this.http.get<BusinessHours[]>(`${this.apiUrl}/business-hours`, this.getAuthOptions());
   }
 
   updateBusinessHours(hours: BusinessHours[]): Observable<BusinessHours[]> {
-    return this.http.put<BusinessHours[]>(`${this.apiUrl}/business-hours`, hours);
+    return this.http.put<BusinessHours[]>(`${this.apiUrl}/business-hours`, hours, this.getAuthOptions());
   }
 }
