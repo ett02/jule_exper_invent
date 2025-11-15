@@ -1,21 +1,12 @@
-<div class="admin-layout">
-  
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <h3>💈 Admin Menu</h3>
-    </div>
-    <ul class="sidebar-nav">
-      <li (click)="changeView('dashboard')" [class.active]="currentView === 'dashboard'">
-        <span class="icon">📅</span> Appuntamenti
-      </li>
-      <li (click)="changeView('servizi')" [class.active]="currentView === 'servizi'">
-        <span class="icon">✂️</span> Gestione Servizi
-      </li>
-      <li (click)="changeView('barbieri')" [class.active]="currentView === 'barbieri'">
-        <span class="icon">👨‍💼</span> Gestione Barbieri
-      </li>
-      <li (click)="changeView('orari')" [class.active]="currentView === 'orari'">
-        <span class="icon">⏰</span> Gestione Orari
+<div class="dashboard-container">
+  <h1>Dashboard Amministratore</h1>
+
+  <div class="section">
+    <h2>Servizi</h2>
+    <ul class="item-list">
+      <li *ngFor="let service of services">
+        <span>{{ service.nome }} - {{ service.prezzo | number: '1.2-2' }} €</span>
+        <button (click)="deleteService(service.id)">Elimina</button>
       </li>
     </ul>
   </div>
@@ -150,19 +141,38 @@
     </div>
   </div>
 
-  <div class="modal" *ngIf="showShopHoursModal">
-    <div class="modal-content">
-      <h3>Configura Orari per {{ getSelectedDayName() }}</h3>
-      <form (ngSubmit)="saveShopHours()">
-        <div class="form-group"><label><input type="checkbox" [(ngModel)]="shopHoursForm.isChiuso" name="isChiuso" /> Salone Chiuso</label></div>
-        <div class="form-row" *ngIf="!shopHoursForm.isChiuso">
-          <div class="form-group"><label>Orario Apertura</label><input type="time" [(ngModel)]="shopHoursForm.orarioApertura" name="orarioApertura" /></div>
-          <div class="form-group"><label>Orario Chiusura</label><input type="time" [(ngModel)]="shopHoursForm.orarioChiusura" name="orarioChiusura" /></div>
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn-add">Salva</button>
-          <button type="button" class="btn-cancel" (click)="closeShopHoursModal()">Annulla</button>
-        </div>
+  <div class="section">
+    <h2>Barbieri</h2>
+    <ul class="item-list">
+      <li *ngFor="let barber of barbers">
+        <span>{{ barber.nome }} {{ barber.cognome }}</span>
+        <button (click)="deleteBarber(barber.id)">Elimina</button>
+      </li>
+    </ul>
+    <div class="form-container">
+      <h3>Aggiungi Barbiere</h3>
+      <form (ngSubmit)="createBarber()">
+        <input type="text" [(ngModel)]="newBarber.nome" name="b_nome" placeholder="Nome" required />
+        <input
+          type="text"
+          [(ngModel)]="newBarber.cognome"
+          name="cognome"
+          placeholder="Cognome"
+          required
+        />
+        <input
+          type="text"
+          [(ngModel)]="newBarber.esperienza"
+          name="esperienza"
+          placeholder="Esperienza"
+        />
+        <input
+          type="text"
+          [(ngModel)]="newBarber.specialita"
+          name="specialita"
+          placeholder="Specialità"
+        />
+        <button type="submit">Aggiungi</button>
       </form>
     </div>
   </div>

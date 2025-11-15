@@ -24,8 +24,8 @@ public class Barbers {
 
     private String esperienza;
 
-    @Column(name = "specialità")  // Nome colonna DB con accento
-    private String specialita; // Nome senza accentoento)
+    @Column(name = "specialità")  // Nome campo DB con accento
+    private String specialita;    // Property Java senza accento per Angular
 
     private Boolean isActive;
 

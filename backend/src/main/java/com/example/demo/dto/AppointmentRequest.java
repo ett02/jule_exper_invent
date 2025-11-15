@@ -11,5 +11,4 @@ public class AppointmentRequest {
     private Long serviceId;
     private LocalDate data;
     private LocalTime orarioInizio;
-    private Integer durata; // Durata in minuti (per validazione)
 }

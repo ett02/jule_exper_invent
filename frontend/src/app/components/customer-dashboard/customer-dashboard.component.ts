@@ -1,28 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AppointmentService } from '../../services/appointment.service';
+import { Appointment } from '../../models/appointment.model';
+import { WaitingList } from '../../models/waiting-list.model';
 
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './customer-dashboard.component.html',
-  styleUrls: ['./customer-dashboard.component.css']
+  styleUrls: ['./customer-dashboard.component.css'],
 })
 export class CustomerDashboardComponent implements OnInit {
-  customerName: string = 'Cliente';
-  appointments: any[] = [];
-  waitingList: any[] = [];
+  private apiService = inject(ApiService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    private apiService: ApiService,
-    private authService: AuthService,
-    private appointmentService: AppointmentService,
-    private router: Router
-  ) {}
+  customerName = 'Cliente';
+  appointments: Appointment[] = [];
+  waitingList: WaitingList[] = [];
 
   ngOnInit(): void {
     // Get customer name from JWT token
@@ -40,44 +38,33 @@ export class CustomerDashboardComponent implements OnInit {
   }
 
   loadAppointments(): void {
-    const userId = this.authService.getDecodedToken().id;
-    
-    this.appointmentService.getAppointmentsByUser(userId).subscribe(
-      (data) => {
-        console.log('Appuntamenti ricevuti:', data);
-        // Transform data per visualizzazione
-        this.appointments = data.map((app: any) => ({
-          id: app.id,
-          serviceName: app.service?.nome || 'Servizio',
-          barberName: `${app.barber?.nome || ''} ${app.barber?.cognome || ''}`,
-          date: app.data,
-          time: app.orarioInizio,
-          duration: app.service?.durata || 0,
-          status: app.stato
-        }));
-      },
-      (error) => {
-        console.error('Errore caricamento appuntamenti:', error);
-        this.appointments = [];
-      }
-    );
+    const decodedToken = this.authService.getDecodedToken();
+    if (decodedToken) {
+      const userId = decodedToken.id;
+      this.apiService.getAppointmentsByUserId(userId).subscribe(
+        (data) => {
+          this.appointments = data;
+        },
+        (error) => {
+          console.error('Error fetching appointments:', error);
+        },
+      );
+    }
   }
 
   loadWaitingList(): void {
-    const userId = this.authService.getDecodedToken().id;
-    // TODO: Implement API call GET /waiting-list/customer/{customerId}
-    // Mock data for now
-    this.waitingList = [
-      // Example:
-      // {
-      //   id: 1,
-      //   serviceName: 'Taglio + Barba',
-      //   barberName: 'Luca Verdi',
-      //   requestedDate: new Date('2025-11-22'),
-      //   position: 2,
-      //   statusMessage: 'Sei il 2° in coda per questo giorno'
-      // }
-    ];
+    const decodedToken = this.authService.getDecodedToken();
+    if (decodedToken) {
+      const userId = decodedToken.id;
+      this.apiService.getWaitingListByCustomerId(userId).subscribe(
+        (data) => {
+          this.waitingList = data;
+        },
+        (error) => {
+          console.error('Error fetching waiting list:', error);
+        },
+      );
+    }
   }
 
   navigateToBooking(): void {
@@ -86,33 +73,27 @@ export class CustomerDashboardComponent implements OnInit {
 
   cancelAppointment(appointmentId: number): void {
     if (confirm('Sei sicuro di voler cancellare questo appuntamento?')) {
-      this.appointmentService.cancelAppointment(appointmentId).subscribe(
+      this.apiService.cancelAppointment(appointmentId).subscribe(
         () => {
-          console.log('Appuntamento cancellato:', appointmentId);
-          alert('✅ Appuntamento cancellato con successo!');
-          this.loadAppointments(); // Ricarica la lista
+          this.loadAppointments();
         },
         (error) => {
-          console.error('Errore cancellazione:', error);
-          alert('❌ Errore durante la cancellazione: ' + (error.error?.message || 'Riprova più tardi'));
-        }
+          console.error('Error canceling appointment:', error);
+        },
       );
     }
   }
 
   removeFromWaitingList(waitingId: number): void {
-    if (confirm('Vuoi rimuoverti dalla lista d\'attesa?')) {
-      // TODO: Implement API call DELETE /waiting-list/{id}
-      console.log('Rimozione dalla lista d\'attesa:', waitingId);
-      alert('Rimosso dalla coda (TODO: Implementare API)');
-      this.loadWaitingList();
-    }
-  }
-
-  logout(): void {
-    if (confirm('Sei sicuro di voler uscire?')) {
-      this.authService.logout();
-      this.router.navigate(['/login']);
+    if (confirm("Vuoi rimuoverti dalla lista d'attesa?")) {
+      this.apiService.removeFromWaitingList(waitingId).subscribe(
+        () => {
+          this.loadWaitingList();
+        },
+        (error) => {
+          console.error('Error removing from waiting list:', error);
+        },
+      );
     }
   }
 }

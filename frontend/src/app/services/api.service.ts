@@ -1,20 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Service } from '../models/service.model';
 import { Barber } from '../models/barber.model';
 import { Appointment } from '../models/appointment.model';
 import { Availability } from '../models/availability.model';
-
+import { WaitingList } from '../models/waiting-list.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
+  private http = inject(HttpClient);
 
   private apiUrl = 'http://localhost:8080';
-
-  constructor(private http: HttpClient) { }
 
   // Service management
   getAllServices(): Observable<Service[]> {
@@ -42,15 +41,6 @@ export class ApiService {
     return this.http.delete<void>(`${this.apiUrl}/barbers/${id}`);
   }
 
-  updateAppointmentStatus(id: number, status: string): Observable<Appointment> {
-    return this.http.put<Appointment>(`${this.apiUrl}/appointments/${id}/status`, { status });
-  }
-
-
-  getAppointmentsByDate(date: string): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/by-date`, { params: { date } });
-  }
-
   // Customer facing methods
   getBarbersForService(serviceId: number): Observable<Barber[]> {
     return this.http.get<Barber[]>(`${this.apiUrl}/services/${serviceId}/barbers`);
@@ -68,13 +58,15 @@ export class ApiService {
     return this.http.get<Appointment[]>(`${this.apiUrl}/appointments/user/${userId}`);
   }
 
-  updateService(id: number, service: Partial<Service>): Observable<Service> {
-    return this.http.put<Service>(`${this.apiUrl}/services/${id}`, service);
+  getWaitingListByCustomerId(customerId: number): Observable<WaitingList[]> {
+    return this.http.get<WaitingList[]>(`${this.apiUrl}/waiting-list/customer/${customerId}`);
   }
 
-  updateBarber(id: number, barber: Partial<Barber>): Observable<Barber> {
-    return this.http.put<Barber>(`${this.apiUrl}/barbers/${id}`, barber);
+  cancelAppointment(appointmentId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/appointments/${appointmentId}`);
   }
 
-
+  removeFromWaitingList(waitingId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/waiting-list/${waitingId}`);
+  }
 }

@@ -1,6 +1,6 @@
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #F5F5DC 0%, #E8E8D0 100%);
+  background: linear-gradient(135deg, #f5f5dc 0%, #e8e8d0 100%);
 }
 
 /* Hero Section */
@@ -11,7 +11,6 @@
   color: var(--color-white);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   margin-bottom: var(--spacing-xl);
-  position: relative;
 }
 
 .welcome-title {
@@ -41,29 +40,6 @@
   background: var(--color-background);
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.btn-logout {
-  position: absolute;
-  top: var(--spacing-md);
-  right: var(--spacing-md);
-  background: var(--color-white);
-  color: var(--color-primary);
-  border: 2px solid var(--color-white);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: var(--font-size-small);
-  cursor: pointer;
-  transition: all var(--transition-normal);
-}
-
-.btn-logout:hover {
-  background: transparent;
-  color: var(--color-white);
-  border-color: var(--color-white);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
 }
 
 /* Appointments Section */
@@ -127,17 +103,17 @@
 }
 
 .badge-confirmato {
-  background: #4CAF50;
+  background: #4caf50;
   color: var(--color-white);
 }
 
 .badge-pending {
-  background: #FFA500;
+  background: #ffa500;
   color: var(--color-white);
 }
 
 .badge-annullato {
-  background: #F44336;
+  background: #f44336;
   color: var(--color-white);
 }
 
@@ -190,7 +166,7 @@
 }
 
 .waiting-card {
-  background: linear-gradient(135deg, #FFF8F0 0%, #FFFFFF 100%);
+  background: linear-gradient(135deg, #fff8f0 0%, #ffffff 100%);
   padding: var(--spacing-lg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
@@ -331,12 +307,5 @@
 
   .appointments-grid {
     grid-template-columns: 1fr;
-  }
-
-  .btn-logout {
-    position: static;
-    display: block;
-    margin: 0 auto var(--spacing-md);
-    width: fit-content;
   }
 }

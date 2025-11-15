@@ -31,19 +31,43 @@ public class BarbersService {
     @Autowired
     private AvailabilityRepository availabilityRepository;
 
+    /**
+     * Gets all barbers.
+     *
+     * @return the list of barbers
+     */
     public List<Barbers> getAllBarbers() {
         return barbersRepository.findAll();
     }
 
+    /**
+     * Gets a barber by id.
+     *
+     * @param id the barber id
+     * @return the barber
+     */
     public Optional<Barbers> getBarberById(Long id) {
         return barbersRepository.findById(id);
     }
 
+    /**
+     * Creates a new barber.
+     *
+     * @param barber the barber to create
+     * @return the created barber
+     */
     public Barbers createBarber(Barbers barber) {
         barber.setIsActive(true);
         return barbersRepository.save(barber);
     }
 
+    /**
+     * Updates a barber.
+     *
+     * @param id            the barber id
+     * @param barberDetails the barber details
+     * @return the updated barber
+     */
     public Barbers updateBarber(Long id, Barbers barberDetails) {
         Barbers barber = barbersRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Barber not found"));
@@ -57,10 +81,22 @@ public class BarbersService {
         return barbersRepository.save(barber);
     }
 
+    /**
+     * Deletes a barber.
+     *
+     * @param id the barber id
+     */
     public void deleteBarber(Long id) {
         barbersRepository.deleteById(id);
     }
 
+    /**
+     * Assigns a service to a barber.
+     *
+     * @param barberId  the barber id
+     * @param serviceId the service id
+     * @return the barber service
+     */
     public BarberServices assignServiceToBarber(Long barberId, Long serviceId) {
         Barbers barber = barbersRepository.findById(barberId)
                 .orElseThrow(() -> new RuntimeException("Barber not found"));
@@ -74,16 +110,29 @@ public class BarbersService {
         return barberServicesRepository.save(barberService);
     }
 
+    /**
+     * Gets all services for a barber.
+     *
+     * @param barberId the barber id
+     * @return the list of barber services
+     */
     public List<BarberServices> getBarberServices(Long barberId) {
         return barberServicesRepository.findByBarberId(barberId);
     }
 
+    /**
+     * Adds an availability for a barber.
+     *
+     * @param barberId the barber id
+     * @param request  the availability request
+     * @return the availability
+     */
     public Availability addAvailability(Long barberId, BarberAvailabilityRequest request) {
         Barbers barber = barbersRepository.findById(barberId)
                 .orElseThrow(() -> new RuntimeException("Barber not found"));
 
         Availability availability = new Availability();
-        availability.setBarbiereId(barberId);
+        availability.setBarber(barber);
         availability.setGiorno(request.getGiorno());
         availability.setOrarioInizio(request.getOrarioInizio());
         availability.setOrarioFine(request.getOrarioFine());
@@ -91,10 +140,22 @@ public class BarbersService {
         return availabilityRepository.save(availability);
     }
 
+    /**
+     * Gets the availability for a barber.
+     *
+     * @param barberId the barber id
+     * @return the list of availabilities
+     */
     public List<Availability> getBarberAvailability(Long barberId) {
-        return availabilityRepository.findByBarbiereId(barberId);
+        return availabilityRepository.findByBarberId(barberId);
     }
 
+    /**
+     * Gets all barbers that provide a service.
+     *
+     * @param serviceId the service id
+     * @return the list of barbers
+     */
     public List<Barbers> getBarbersByService(Long serviceId) {
         List<BarberServices> barberServices = barberServicesRepository.findByServiceId(serviceId);
         return barberServices.stream()

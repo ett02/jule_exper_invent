@@ -6,12 +6,10 @@ import com.example.demo.service.BarbersService;
 import com.example.demo.service.ServicesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-import org.springframework.security.access.prepost.PreAuthorize; // <-- AGGIUNGI IMPORT
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping; // <-- AGGIUNGI IMPORT
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +27,6 @@ public class ServicesController {
     private BarbersService barbersService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')") // <-- AGGIUNTO
     public Services createService(@RequestBody @NonNull Services service) {
         return servicesService.createService(service);
     }
@@ -41,18 +38,10 @@ public class ServicesController {
 
     @GetMapping("/{id}")
     public Services getServiceById(@PathVariable @NonNull Long id) {
-        return servicesService.getServiceById(id);
-    }
-    
-    // Questo era il metodo che abbiamo aggiunto in precedenza
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')") // <-- AGGIUNTO
-    public Services updateService(@PathVariable @NonNull Long id, @RequestBody @NonNull Services service) {
-        return servicesService.updateService(id, service);
+        return servicesService.getServiceById(id).orElse(null);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')") // <-- AGGIUNTO
     public void deleteService(@PathVariable @NonNull Long id) {
         servicesService.deleteService(id);
     }
